@@ -1,0 +1,159 @@
+/* Autor: Rafael Mendes Valente - RA: 25002875 */
+/* Data: 24/08/2026 */
+/* Descrição: Estilos utilizados na página de login do sistema */
+
+/* Configurações gerais da página */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+  color: #1e293b;
+}
+
+/* Organiza as duas colunas principais da tela */
+.shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+/* Coluna de identidade do sistema */
+.brand {
+  width: 320px;
+  color: #1e1b4b;
+}
+
+/* Organiza o símbolo e o nome do sistema */
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Símbolo utilizado na identificação do sistema */
+.logo-mark {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  font-size: 17px;
+  font-weight: bold;
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.25);
+}
+
+/* Nome apresentado ao lado do símbolo */
+.logo-text {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1.3;
+}
+
+/* Área responsável pela autenticação */
+.auth {
+  width: 100%;
+  max-width: 360px;
+}
+
+/* Cartão que contém o formulário de login */
+.auth-card {
+  background-color: #fff;
+  padding: 28px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(30, 41, 59, 0.10);
+}
+
+/* Título da área de autenticação */
+.auth-title {
+  margin: 0 0 22px;
+  font-size: 24px;
+  color: #1e1b4b;
+}
+
+/* Espaçamento entre os campos */
+.field {
+  margin-bottom: 16px;
+}
+
+/* Identificação dos campos */
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #374151;
+}
+
+/* Campos de e-mail e senha */
+.field input {
+  width: 100%;
+  padding: 10px 11px;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: #1f2937;
+  background-color: #fafafa;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+  transition: 0.2s;
+}
+
+/* Destaca o campo que está sendo preenchido */
+.field input:focus {
+  background-color: #fff;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+/* Área da opção de manter o usuário conectado */
+.row-between {
+  margin-bottom: 18px;
+  font-size: 13px;
+}
+
+/* Alinha o checkbox com seu texto */
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+/* Botão principal de acesso */
+button.primary {
+  width: 100%;
+  padding: 11px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46e5, #6d28d9);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* Altera o botão ao passar o mouse */
+button.primary:hover {
+  background: linear-gradient(135deg, #4338ca, #5b21b6);
+  transform: translateY(-1px);
+}
+
+/* Informação complementar sobre o cadastro */
+.hint {
+  margin: 18px 0 0;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #6b7280;
+}
