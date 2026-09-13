@@ -1,0 +1,121 @@
+/* Autor: Rafael Mendes Valente - RA: 25002875 */
+/* Data: 11/09/2026 */
+/* Descrição: Estilos utilizados na página de listagem de demandas do sistema */
+
+.page-demandas {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.demandas-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.demandas-header h1 {
+  font-size: 18px;
+  color: #1e293b;
+  margin: 0 0 5px;
+}
+
+.demandas-header h2 {
+  font-size: 22px;
+  margin: 0;
+}
+
+/* Barra de filtros, busca e ordenação */
+.barra-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.campo-busca {
+  flex: 2;
+  min-width: 200px;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.filtro {
+  flex: 1;
+  min-width: 130px;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+/* Tabela de demandas */
+.tabela-demandas {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.tabela-demandas table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabela-demandas th,
+.tabela-demandas td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+.tabela-demandas th {
+  color: #555;
+  font-weight: bold;
+}
+
+/* Tags de prioridade */
+.tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.tag-critica {
+  background-color: #dc2626;
+}
+
+.tag-alta {
+  background-color: #f59e0b;
+}
+
+.tag-media {
+  background-color: #2563eb;
+}
+
+.tag-baixa {
+  background-color: #64748b;
+}
+
+@media (max-width: 600px) {
+  .barra-filtros {
+    flex-direction: column;
+  }
+
+  .filtro,
+  .campo-busca {
+    width: 100%;
+  }
+}
