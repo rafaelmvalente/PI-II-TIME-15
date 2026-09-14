@@ -1,0 +1,132 @@
+<!-- Autor: Mateus Oliveira Rafael - RA: 25001369-->
+<!-- Data: 13/09/2026 -->
+<!-- Descrição: Tela de detalhes de uma demanda, com informações completas, histórico de alterações e comentários -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes da Demanda — Sistema de Acompanhamento de Demandas</title>
+  <link rel="stylesheet" href="CSS/detalhes-demanda.css">
+</head>
+<body>
+
+  <div class="page-detalhes">
+
+    <header class="detalhes-header">
+      <h1>Sistema de Acompanhamento de Demandas</h1>
+      <h2>Detalhes da Demanda</h2>
+    </header>
+
+    <!-- Informações principais da demanda -->
+    <section class="cartao-demanda">
+
+      <div class="topo-demanda">
+        <div>
+          <span class="codigo-demanda">#0001</span>
+          <h3 class="titulo-demanda">Corrigir erro no login</h3>
+        </div>
+
+        <div class="tags-demanda">
+          <span class="tag tag-tipo">Defeito</span>
+          <span class="tag tag-critica">Crítica</span>
+          <span class="tag status-andamento">Em andamento</span>
+        </div>
+      </div>
+
+      <p class="descricao-demanda">
+        Usuários relatam que, em alguns navegadores, o formulário de login não
+        redireciona corretamente após a autenticação, exigindo que a página
+        seja recarregada manualmente.
+      </p>
+
+      <!-- Informações complementares da demanda -->
+      <div class="grade-info">
+        <div class="info-item">
+          <span class="rotulo">Projeto</span>
+          <span class="valor">Projeto A</span>
+        </div>
+        <div class="info-item">
+          <span class="rotulo">Responsável</span>
+          <span class="valor">Usuário 1</span>
+        </div>
+        <div class="info-item">
+          <span class="rotulo">Criada em</span>
+          <span class="valor">05/09/2026</span>
+        </div>
+        <div class="info-item">
+          <span class="rotulo">Última atualização</span>
+          <span class="valor">12/09/2026</span>
+        </div>
+        <div class="info-item">
+          <span class="rotulo">Prazo de finalização</span>
+          <span class="valor">20/09/2026</span>
+        </div>
+      </div>
+
+      <!-- Ações disponíveis, de acordo com o perfil do usuário logado -->
+      <div class="acoes-demanda">
+        <button class="secundario">Editar</button>
+        <button class="secundario">Alterar status</button>
+        <button class="perigo">Cancelar demanda</button>
+      </div>
+
+    </section>
+
+    <!-- Histórico de alterações da demanda. Não é apagado nem após o cancelamento -->
+    <section class="cartao-secao">
+      <h3>Histórico de alterações</h3>
+      <ul class="lista-historico">
+        <li>
+          <span class="historico-texto">João alterou o status da demanda de <strong>Aberta</strong> para <strong>Em andamento</strong>.</span>
+          <span class="historico-data">06/09/2026 09:15</span>
+        </li>
+        <li>
+          <span class="historico-texto">Maria atribuiu a demanda para <strong>Usuário 1</strong>.</span>
+          <span class="historico-data">05/09/2026 17:40</span>
+        </li>
+        <li>
+          <span class="historico-texto">Demanda criada por <strong>Maria</strong>.</span>
+          <span class="historico-data">05/09/2026 14:02</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Comentários registrados na demanda -->
+    <section class="cartao-secao">
+      <h3>Comentários</h3>
+
+      <ul class="lista-comentarios">
+        <li class="comentario">
+          <div class="comentario-cabecalho">
+            <span class="comentario-autor">Usuário 1</span>
+            <span class="comentario-data">11/09/2026 10:22</span>
+          </div>
+          <p class="comentario-texto">
+            Consegui reproduzir o problema no navegador Firefox. Investigando a causa.
+          </p>
+        </li>
+        <li class="comentario">
+          <div class="comentario-cabecalho">
+            <span class="comentario-autor">Maria</span>
+            <span class="comentario-data">05/09/2026 18:10</span>
+          </div>
+          <p class="comentario-texto">
+            Priorizar essa correção, pois está afetando vários usuários.
+          </p>
+        </li>
+      </ul>
+
+      <!-- Formulário para registro de um novo comentário -->
+      <div class="novo-comentario">
+        <textarea placeholder="Escreva um comentário..." rows="3"></textarea>
+        <button class="primario">Comentar</button>
+      </div>
+
+    </section>
+
+  </div>
+
+</body>
+</html>
