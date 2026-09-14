@@ -1,0 +1,123 @@
+<!-- Autor: Mateus Oliveira Rafael - RA: 25001369-->
+<!-- Data: 13/09/2026 -->
+<!-- Descrição: Tela de cadastro e edição de demanda, com os campos obrigatórios da demanda -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro/Edição de Demanda — Sistema de Acompanhamento de Demandas</title>
+  <link rel="stylesheet" href="CSS/cadastro-demanda.css">
+</head>
+<body>
+
+  <div class="page-cadastro">
+
+    <header class="cadastro-header">
+      <h1>Sistema de Acompanhamento de Demandas</h1>
+      <h2>Cadastro / Edição de Demanda</h2>
+    </header>
+
+    <!--
+         Formulário de cadastro e edição de demanda. A mesma tela é utilizada
+         para criar uma nova demanda e para editar uma demanda existente.
+         Ao criar uma demanda, o status inicial é definido automaticamente
+         como "Aberta".
+          -->
+    <section class="form-demanda">
+      <form id="formDemanda">
+
+        <!-- Título da demanda -->
+        <div class="campo campo-largo">
+          <label for="titulo">Título</label>
+          <input type="text" id="titulo" name="titulo" placeholder="Ex.: Corrigir erro no login" required>
+        </div>
+
+        <!-- Descrição detalhada da demanda -->
+        <div class="campo campo-largo">
+          <label for="descricao">Descrição</label>
+          <textarea id="descricao" name="descricao" rows="4" placeholder="Descreva a demanda com detalhes..."></textarea>
+        </div>
+
+        <!-- Tipo e prioridade da demanda, lado a lado -->
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="tipo">Tipo</label>
+            <select id="tipo" name="tipo" required>
+              <option value="">Selecione</option>
+              <option value="tarefa">Tarefa</option>
+              <option value="defeito">Defeito</option>
+              <option value="melhoria">Melhoria</option>
+              <option value="documentacao">Documentação</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="prioridade">Prioridade</label>
+            <select id="prioridade" name="prioridade" required>
+              <option value="">Selecione</option>
+              <option value="critica">Crítica</option>
+              <option value="alta">Alta</option>
+              <option value="media">Média</option>
+              <option value="baixa">Baixa</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Projeto associado e responsável pela demanda, lado a lado -->
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="projeto">Projeto</label>
+            <select id="projeto" name="projeto" required>
+              <option value="">Selecione</option>
+              <option value="projeto1">Projeto A</option>
+              <option value="projeto2">Projeto B</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="responsavel">Responsável</label>
+            <!-- O responsável pode ficar em branco no momento da criação da demanda -->
+            <select id="responsavel" name="responsavel">
+              <option value="">Sem responsável definido</option>
+              <option value="usuario1">Usuário 1</option>
+              <option value="usuario2">Usuário 2</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Status e prazo de finalização, lado a lado -->
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="status">Status</label>
+            <!-- Em uma nova demanda, o status inicia obrigatoriamente como "Aberta" -->
+            <select id="status" name="status">
+              <option value="aberta" selected>Aberta</option>
+              <option value="em_andamento">Em andamento</option>
+              <option value="em_revisao">Em revisão</option>
+              <option value="concluida">Concluída</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="prazo">Prazo de finalização</label>
+            <input type="date" id="prazo" name="prazo">
+            <span class="dica">Datas em feriados nacionais não serão aceitas</span>
+          </div>
+        </div>
+
+        <!-- Ações do formulário -->
+        <div class="acoes-formulario">
+          <button type="button" class="secundario" id="btnCancelar">Cancelar</button>
+          <button type="submit" class="primario" id="btnSalvar">Salvar demanda</button>
+        </div>
+
+      </form>
+    </section>
+
+  </div>
+
+</body>
+</html>

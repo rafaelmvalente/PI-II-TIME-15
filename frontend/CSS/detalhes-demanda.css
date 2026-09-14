@@ -1,0 +1,325 @@
+/* Autor: Mateus Oliveira Rafael - RA: 25001369 */
+/* Data: 13/09/2026 */
+/* Descrição: Estilos utilizados na página de detalhes da demanda */
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f5f7;
+  color: #1e293b;
+}
+
+.page-detalhes {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.detalhes-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.detalhes-header h1 {
+  font-size: 18px;
+  color: #1e293b;
+  margin: 0 0 5px;
+}
+
+.detalhes-header h2 {
+  font-size: 22px;
+  margin: 0;
+}
+
+/* Cartão genérico usado nas seções da página */
+.cartao-demanda,
+.cartao-secao {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.cartao-secao h3 {
+  font-size: 15px;
+  margin: 0 0 15px;
+}
+
+/* Cabeçalho com título e tags da demanda */
+.topo-demanda {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.codigo-demanda {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.titulo-demanda {
+  font-size: 19px;
+  margin: 4px 0 0;
+}
+
+.tags-demanda {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Tags de tipo, prioridade e status */
+.tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.tag-tipo {
+  background-color: #475569;
+}
+
+.tag-critica {
+  background-color: #dc2626;
+}
+
+.tag-alta {
+  background-color: #f59e0b;
+}
+
+.tag-media {
+  background-color: #2563eb;
+}
+
+.tag-baixa {
+  background-color: #64748b;
+}
+
+.status-aberta {
+  background-color: #64748b;
+}
+
+.status-andamento {
+  background-color: #2563eb;
+}
+
+.status-revisao {
+  background-color: #d97706;
+}
+
+.status-concluida {
+  background-color: #16a34a;
+}
+
+.status-cancelada {
+  background-color: #6b7280;
+}
+
+.descricao-demanda {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #334155;
+  margin: 0 0 20px;
+}
+
+/* Grade de informações complementares */
+.grade-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.info-item .rotulo {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.info-item .valor {
+  font-size: 14px;
+  font-weight: bold;
+  color: #1e293b;
+}
+
+/* Ações disponíveis para a demanda */
+.acoes-demanda {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+button.primario {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46e5, #6d28d9);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button.primario:hover {
+  background: linear-gradient(135deg, #4338ca, #5b21b6);
+}
+
+button.secundario {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #374151;
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button.secundario:hover {
+  background-color: #f3f4f6;
+}
+
+button.perigo {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #dc2626;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button.perigo:hover {
+  background-color: #b91c1c;
+}
+
+/* Histórico de alterações */
+.lista-historico {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lista-historico li {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 10px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #eee;
+}
+
+.lista-historico li:last-child {
+  border-bottom: none;
+}
+
+.historico-texto {
+  color: #334155;
+}
+
+.historico-data {
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+/* Comentários */
+.lista-comentarios {
+  list-style: none;
+  margin: 0 0 15px;
+  padding: 0;
+}
+
+.comentario {
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.comentario:last-child {
+  border-bottom: none;
+}
+
+.comentario-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.comentario-autor {
+  font-size: 13px;
+  font-weight: bold;
+  color: #1e293b;
+}
+
+.comentario-data {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.comentario-texto {
+  font-size: 14px;
+  color: #334155;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Formulário de novo comentário */
+.novo-comentario {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.novo-comentario textarea {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1f2937;
+  background-color: #fafafa;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.novo-comentario button {
+  align-self: flex-end;
+}
+
+@media (max-width: 600px) {
+  .topo-demanda {
+    flex-direction: column;
+  }
+
+  .acoes-demanda {
+    flex-direction: column;
+  }
+
+  .acoes-demanda button {
+    width: 100%;
+  }
+}
