@@ -157,3 +157,10 @@ button.primary:hover {
   line-height: 1.5;
   color: #6b7280;
 }
+
+.erro-validacao {
+  display: block;
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
