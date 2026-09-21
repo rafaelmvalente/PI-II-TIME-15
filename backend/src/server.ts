@@ -1,4 +1,4 @@
-// Autor: Vinicius Santucci Virgolino - RA: 25000294
+// Autor: Vinicius Santuci Virgolino - RA: 25000294
 // Data: 21/09/2026
 // Descrição: Servidor Express básico do Sistema de Acompanhamento de Demandas
 
