@@ -134,3 +134,55 @@
     flex-direction: column;
   }
 }
+
+/* Filtro do dashboard */
+.filtro-dashboard {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.filtro-dashboard form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.campo-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13px;
+}
+
+.campo-filtro select,
+.campo-filtro input {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.campo-filtro-radio {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.rotulo-radio {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.erro-campo {
+  font-size: 12px;
+  color: #dc2626;
+  min-height: 14px;
+}
+
+.campo-invalido {
+  border-color: #dc2626 !important;
+}
