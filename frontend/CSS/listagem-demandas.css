@@ -119,3 +119,27 @@
     width: 100%;
   }
 }
+
+/* Autor: Tiago Medeiros */
+/* Descrição: Estados de validação e mensagem de "sem resultados" */
+
+.campo-com-erro {
+  display: flex;
+  flex-direction: column;
+  flex: 2;
+  min-width: 200px;
+}
+
+.erro-validacao {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+  min-height: 14px;
+}
+
+.mensagem-vazia {
+  text-align: center;
+  color: #64748b;
+  padding: 20px 0 5px;
+  font-size: 14px;
+}

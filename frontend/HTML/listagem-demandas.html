@@ -1,6 +1,7 @@
 <!-- Autor: Rafael Mendes Valente - RA: 25002875-->
 <!-- Data: 11/09/2026 -->
 <!-- Descrição: Tela de listagem de demandas, com filtros, busca e ordenação -->
+<!-- Comportamento e validações em JS: Tiago Medeiros -->
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -23,14 +24,18 @@
     <section class="barra-filtros">
 
       <!-- Campo de busca textual (título ou descrição) -->
-      <input
-        type="text"
-        class="campo-busca"
-        placeholder="Buscar por título ou descrição..."
-      >
+      <div class="campo-com-erro">
+        <input
+          type="text"
+          id="campoBusca"
+          class="campo-busca"
+          placeholder="Buscar por título ou descrição..."
+        >
+        <span id="erroBusca" class="erro-validacao"></span>
+      </div>
 
       <!-- Filtro por status -->
-      <select class="filtro">
+      <select id="filtroStatus" class="filtro">
         <option value="">Status</option>
         <option value="aberta">Aberta</option>
         <option value="em_andamento">Em andamento</option>
@@ -40,7 +45,7 @@
       </select>
 
       <!-- Filtro por prioridade -->
-      <select class="filtro">
+      <select id="filtroPrioridade" class="filtro">
         <option value="">Prioridade</option>
         <option value="critica">Crítica</option>
         <option value="alta">Alta</option>
@@ -49,7 +54,7 @@
       </select>
 
       <!-- Filtro por tipo -->
-      <select class="filtro">
+      <select id="filtroTipo" class="filtro">
         <option value="">Tipo</option>
         <option value="tarefa">Tarefa</option>
         <option value="defeito">Defeito</option>
@@ -57,23 +62,20 @@
         <option value="documentacao">Documentação</option>
       </select>
 
-      <!-- Filtro por responsável -->
-      <select class="filtro">
+      <!-- Filtro por responsável (preenchido dinamicamente pelo JS) -->
+      <select id="filtroResponsavel" class="filtro">
         <option value="">Responsável</option>
-        <option value=></option>
-        <option value=></option>
-        <option value=></option>
       </select>
 
       <!-- Filtro por projeto -->
-      <select class="filtro">
+      <select id="filtroProjeto" class="filtro">
         <option value="">Projeto</option>
         <option value="projeto1">Projeto A</option>
         <option value="projeto2">Projeto B</option>
       </select>
 
       <!-- Ordenação dos resultados -->
-      <select class="filtro">
+      <select id="filtroOrdenar" class="filtro">
         <option value="">Ordenar por</option>
         <option value="prioridade">Prioridade</option>
         <option value="data_criacao">Data de criação</option>
@@ -83,10 +85,11 @@
 
     </section>
 
-    <!-- 
-         Exibe, título, tipo, prioridade, status,
+    <!--
+         Exibe título, tipo, prioridade, status,
          projeto, responsável, data de criação e prazo de
-         finalização.
+         finalização. As linhas são geradas dinamicamente pelo
+         listagem-demandas.js a partir dos filtros aplicados.
           -->
     <section class="tabela-demandas">
       <table>
@@ -102,48 +105,17 @@
             <th>Prazo</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
+        <tbody id="corpoTabela">
         </tbody>
       </table>
+
+      <p id="mensagemVazio" class="mensagem-vazia" hidden>
+        Nenhuma demanda encontrada com os filtros selecionados.
+      </p>
     </section>
 
   </div>
 
+  <script src="../JS/listagem-demandas.js" defer></script>
 </body>
 </html>
