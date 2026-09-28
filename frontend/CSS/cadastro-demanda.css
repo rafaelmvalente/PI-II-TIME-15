@@ -1,0 +1,150 @@
+/* Autor: Mateus Oliveira Rafael - RA: 25001369 */
+/* Data: 13/09/2026 */
+/* Descrição: Estilos utilizados na página de cadastro e edição de demanda */
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f5f7;
+  color: #1e293b;
+}
+
+.page-cadastro {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.cadastro-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.cadastro-header h1 {
+  font-size: 18px;
+  color: #1e293b;
+  margin: 0 0 5px;
+}
+
+.cadastro-header h2 {
+  font-size: 22px;
+  margin: 0;
+}
+
+/* Cartão que contém o formulário */
+.form-demanda {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 25px;
+}
+
+.campo {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 18px;
+}
+
+.campo-largo {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.campo label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #374151;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  padding: 9px 10px;
+  box-sizing: border-box;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1f2937;
+  background-color: #fafafa;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.campo textarea {
+  resize: vertical;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  background-color: #fff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.dica {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Agrupa dois campos lado a lado */
+.linha-campos {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Botões de ação do formulário */
+.acoes-formulario {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+}
+
+button.primario {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46e5, #6d28d9);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button.primario:hover {
+  background: linear-gradient(135deg, #4338ca, #5b21b6);
+  transform: translateY(-1px);
+}
+
+button.secundario {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #374151;
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button.secundario:hover {
+  background-color: #f3f4f6;
+}
+
+@media (max-width: 600px) {
+  .linha-campos {
+    flex-direction: column;
+  }
+}

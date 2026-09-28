@@ -1,0 +1,210 @@
+<!-- Autor: Rafael Mendes Valente - RA: 25002875-->
+<!-- Data: 10/09/2026 -->
+<!-- Descrição: Tela de Dashboard com indicadores resumidos das demandas -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Sistema de Acompanhamento de Demandas</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <div class="page-dashboard">
+
+    <header class="dashboard-header">
+      <h1>Sistema de Acompanhamento de Demandas</h1>
+      <h2>Dashboard</h2>
+    </header>
+
+    <!--
+         Filtro do dashboard.
+         Permite refinar os indicadores por projeto, período de
+         criação e quantidade de itens exibidos. As validações
+         em JavaScript (dashboard.js) garantem que o filtro só
+         seja enviado com dados coerentes.
+          -->
+    <section class="filtro-dashboard">
+      <form id="filtroDashboardForm">
+
+        <div class="campo-filtro">
+          <label for="filtroProjeto">Projeto</label>
+          <select id="filtroProjeto" name="projeto">
+            <option value="">Todos os projetos</option>
+            <option value="projeto1">Projeto Alfa</option>
+            <option value="projeto2">Projeto Beta</option>
+          </select>
+        </div>
+
+        <div class="campo-filtro">
+          <label for="dataInicio">Data inicial</label>
+          <input type="date" id="dataInicio" name="dataInicio">
+          <span class="erro-campo" id="erroDataInicio"></span>
+        </div>
+
+        <div class="campo-filtro">
+          <label for="dataFim">Data final</label>
+          <input type="date" id="dataFim" name="dataFim">
+          <span class="erro-campo" id="erroDataFim"></span>
+        </div>
+
+        <div class="campo-filtro">
+          <label for="quantidadeItens">Qtd. de itens exibidos</label>
+          <input type="number" id="quantidadeItens" name="quantidadeItens" value="5" min="1" max="50" required>
+          <span class="erro-campo" id="erroQuantidade"></span>
+        </div>
+
+        <div class="campo-filtro campo-filtro-radio">
+          <span class="rotulo-radio">Ordenar críticas por</span>
+          <label><input type="radio" name="ordenarPor" value="prioridade"> Prioridade</label>
+          <label><input type="radio" name="ordenarPor" value="prazo"> Prazo</label>
+          <span class="erro-campo" id="erroOrdenacao"></span>
+        </div>
+
+        <button type="submit" class="primary" id="btnFiltrarDashboard">Filtrar</button>
+
+      </form>
+    </section>
+
+    <!--
+         Contadores por status. Exibe a quantidade total de demandas e a quantidade em
+         cada status do ciclo de vida (Aberta, Em andamento, em revisão, Concluída, Cancelada).
+          -->
+    <section class="contadores">
+
+      <div class="card-contador">
+        <span class="numero">0</span>
+        <span class="rotulo">Total de demandas</span>
+      </div>
+
+      <div class="card-contador">
+        <span class="numero">0</span>
+        <span class="rotulo">Abertas</span>
+      </div>
+
+      <div class="card-contador">
+        <span class="numero">0</span>
+        <span class="rotulo">Em andamento</span>
+      </div>
+
+      <div class="card-contador">
+        <span class="numero">0</span>
+        <span class="rotulo">Em revisão</span>
+      </div>
+
+      <div class="card-contador">
+        <span class="numero">0</span>
+        <span class="rotulo">Concluídas</span>
+      </div>
+
+      <div class="card-contador">
+        <span class="numero">0</span>
+        <span class="rotulo">Canceladas</span>
+      </div>
+
+    </section>
+
+    <!-- 
+         Contadores por prioridade e por tipo
+         Dois grupos lado a lado.
+          -->
+    <section class="grupos-secundarios">
+
+      <!-- Quantidade de demandas por prioridade -->
+      <div class="grupo">
+        <h3>Demandas por prioridade</h3>
+        <ul class="lista-contagem">
+          <li><span>Crítica</span><span>0</span></li>
+          <li><span>Alta</span><span>0</span></li>
+          <li><span>Média</span><span>0</span></li>
+          <li><span>Baixa</span><span>0</span></li>
+        </ul>
+      </div>
+
+      <!-- Quantidade de demandas por tipo -->
+      <div class="grupo">
+        <h3>Demandas por tipo</h3>
+        <ul class="lista-contagem">
+          <li><span>Tarefa</span><span>0</span></li>
+          <li><span>Defeito</span><span>0</span></li>
+          <li><span>Melhoria</span><span>0</span></li>
+          <li><span>Documentação</span><span>0</span></li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- 
+         Demandas críticas em aberto
+         Lista de demandas com prioridade crítica que ainda não
+         foram concluídas nem canceladas.
+          -->
+    <section class="lista-demandas">
+      <h3>Demandas críticas em aberto</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Status</th>
+            <th>Responsável</th>
+            <th>Prazo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 
+         Demandas próximas do prazo de finalização
+         Lista de demandas cujo prazo está se aproximando,
+         independente da prioridade.
+          -->
+    <section class="lista-demandas">
+      <h3>Demandas próximas do prazo</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Prioridade</th>
+            <th>Status</th>
+            <th>Prazo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <script src="dashboard.js"></script>
+
+</body>
+</html>
