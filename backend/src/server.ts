@@ -4,6 +4,8 @@
 
 import express from 'express';
 import type { Request, Response } from 'express';
+import { validarTransicaoDeStatus } from './regras-status.js';
+import type { Perfil, Status } from './regras-status.js';
 
 const app = express();
 const PORT = 3000;
