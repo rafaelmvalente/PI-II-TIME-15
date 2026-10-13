@@ -97,7 +97,7 @@
     <section class="cartao-secao">
       <h3>Comentários</h3>
 
-      <ul class="lista-comentarios">
+      <ul class="lista-comentarios" id="listaComentarios">
         <li class="comentario">
           <div class="comentario-cabecalho">
             <span class="comentario-autor">Usuário 1</span>
@@ -120,13 +120,15 @@
 
       <!-- Formulário para registro de um novo comentário -->
       <div class="novo-comentario">
-        <textarea placeholder="Escreva um comentário..." rows="3"></textarea>
-        <button class="primario">Comentar</button>
+        <textarea id="textoComentario" placeholder="Escreva um comentário..." rows="3"></textarea>
+        <span class="erro-validacao" id="erroComentario"></span>
+        <button class="primario" id="btnComentar">Comentar</button>
       </div>
 
     </section>
 
   </div>
 
+  <script src="../JS/detalhes-demanda.js"></script>
 </body>
 </html>
