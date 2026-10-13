@@ -7,6 +7,7 @@ import type { Request, Response } from 'express';
 import { validarTransicaoDeStatus } from './regras-status.js';
 import type { Perfil, Status } from './regras-status.js';
 import comentariosRouter from './comentarios.js';
+import historicoRouter from './historico.js';
 
 const app = express();
 const PORT = 3000;
@@ -44,6 +45,9 @@ app.post('/demandas/validar-status', (req: Request, res: Response) => {
 
 // Rotas de comentários das demandas
 app.use(comentariosRouter);
+
+// Rotas do histórico de alterações das demandas
+app.use(historicoRouter);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
