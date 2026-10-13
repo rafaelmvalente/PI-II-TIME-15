@@ -31,7 +31,7 @@
         <div class="tags-demanda">
           <span class="tag tag-tipo">Defeito</span>
           <span class="tag tag-critica">Crítica</span>
-          <span class="tag status-andamento">Em andamento</span>
+          <span class="tag status-andamento" id="statusDemanda">Em andamento</span>
         </div>
       </div>
 
@@ -69,7 +69,7 @@
       <div class="acoes-demanda">
         <button class="secundario">Editar</button>
         <button class="secundario">Alterar status</button>
-        <button class="perigo">Cancelar demanda</button>
+        <button class="perigo" id="btnCancelar">Cancelar demanda</button>
       </div>
 
     </section>
@@ -77,7 +77,7 @@
     <!-- Histórico de alterações da demanda. Não é apagado nem após o cancelamento -->
     <section class="cartao-secao">
       <h3>Histórico de alterações</h3>
-      <ul class="lista-historico">
+      <ul class="lista-historico" id="listaHistorico">
         <li>
           <span class="historico-texto">João alterou o status da demanda de <strong>Aberta</strong> para <strong>Em andamento</strong>.</span>
           <span class="historico-data">06/09/2026 09:15</span>
@@ -97,7 +97,7 @@
     <section class="cartao-secao">
       <h3>Comentários</h3>
 
-      <ul class="lista-comentarios">
+      <ul class="lista-comentarios" id="listaComentarios">
         <li class="comentario">
           <div class="comentario-cabecalho">
             <span class="comentario-autor">Usuário 1</span>
@@ -120,13 +120,15 @@
 
       <!-- Formulário para registro de um novo comentário -->
       <div class="novo-comentario">
-        <textarea placeholder="Escreva um comentário..." rows="3"></textarea>
-        <button class="primario">Comentar</button>
+        <textarea id="textoComentario" placeholder="Escreva um comentário..." rows="3"></textarea>
+        <span class="erro-validacao" id="erroComentario"></span>
+        <button class="primario" id="btnComentar">Comentar</button>
       </div>
 
     </section>
 
   </div>
 
+  <script src="../JS/detalhes-demanda.js"></script>
 </body>
 </html>
