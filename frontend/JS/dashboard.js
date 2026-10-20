@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var valido = true;
 
-    intervalo permitido (1 a 50)
+    // intervalo permitido (1 a 50)
     if (!quantidade) {
       erroQuantidade.textContent = "Informe a quantidade de itens a exibir.";
       campoQuantidade.classList.add("campo-invalido");
