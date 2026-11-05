@@ -19,7 +19,3 @@ export function criarSessao(usuarioId: number): string {
 export function buscarUsuarioIdPorToken(token: string): number | undefined {
   return sessoes.get(token);
 }
-
-export function encerrarSessao(token: string): void {
-  sessoes.delete(token);
-}

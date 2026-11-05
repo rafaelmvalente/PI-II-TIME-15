@@ -96,17 +96,4 @@ export const demandas: Demanda[] = [
     atualizadaEm: "2026-09-30",
     prazoFinalizacao: null,
   },
-  {
-    id: 5,
-    titulo: "Criar validação de prazo com feriados",
-    descricao: "Consultar API de feriados nacionais ao salvar a demanda",
-    tipo: "Tarefa",
-    prioridade: "Alta",
-    status: "Aberta",
-    projetoId: 1,
-    responsavelId: 3,
-    criadaEm: "2026-11-01",
-    atualizadaEm: "2026-11-01",
-    prazoFinalizacao: "2026-11-20",
-  },
 ];

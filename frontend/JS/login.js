@@ -2,8 +2,6 @@
 // Data: 21/09/2026
 // Descrição: Validações em JavaScript do formulário de login
 
-const API_URL = "http://localhost:3000/api";
-
 document.addEventListener("DOMContentLoaded", function () {
 
     const formulario = document.getElementById("loginForm");
@@ -104,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ENVIO DO FORMULÁRIO
 
-    formulario.addEventListener("submit", async function (event) {
+    formulario.addEventListener("submit", function (event) {
 
         // Impede o envio do formulário
         event.preventDefault();
@@ -114,39 +112,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         // Só continua se os dois campos forem válidos
-        if (!emailValido || !senhaValida) {
-            return;
-        }
-
-
-        // LOGIN NA API
-        // Alterado por: Vinicius Santuci Virgolino - RA: 25000294 (05/11/2026)
-
-        try {
-            const resposta = await fetch(API_URL + "/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: email.value.trim(),
-                    senha: senha.value
-                })
-            });
-
-            const dados = await resposta.json();
-
-            if (!resposta.ok) {
-                mostrarErro(senha, dados.mensagem);
-                return;
-            }
-
-            // Guarda o token ("crachá") e os dados do usuário para as próximas telas
-            localStorage.setItem("token", dados.token);
-            localStorage.setItem("usuario", JSON.stringify(dados.usuario));
-
-            window.location.href = "dashboard.html";
-
-        } catch (erro) {
-            mostrarErro(senha, "Não foi possível conectar ao servidor.");
+        if (emailValido && senhaValida) {
+            alert("Dados validados com sucesso!");
         }
 
     });

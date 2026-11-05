@@ -1,12 +1,11 @@
 // Autor: Vinicius Santuci Virgolino - RA: 25000294
 // Data: 05/11/2026
-// Descrição: Rotas de login e logout
+// Descrição: Rota de login
 
 import { Router } from "express";
 import type { Request, Response } from "express";
 import { usuarios } from "../data/dados.js";
-import { criarSessao, encerrarSessao } from "../auth/sessoes.js";
-import { autenticar } from "../auth/autenticar.js";
+import { criarSessao } from "../auth/sessoes.js";
 
 const router = Router();
 
@@ -37,11 +36,6 @@ router.post("/login", (req: Request, res: Response) => {
       perfil: usuario.perfil,
     },
   });
-});
-
-router.post("/logout", autenticar, (req: Request, res: Response) => {
-  encerrarSessao(req.token!);
-  return res.status(204).send();
 });
 
 export default router;
