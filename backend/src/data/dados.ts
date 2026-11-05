@@ -2,17 +2,20 @@
 // Data: 20/10/2026
 // Descrição: Dados de teste em memória
 
+export type Perfil = "Administrador" | "Líder de Projeto" | "Membro da Equipe";
+
 export interface Usuario {
   id: number;
   nome: string;
   email: string;
   senha: string; // nunca deve ser devolvida nas respostas da API
-  perfil: "Administrador" | "Líder de Projeto" | "Membro da Equipe";
+  perfil: Perfil;
 }
 
 export interface Projeto {
   id: number;
   nome: string;
+  liderIds: number[]; // usuários com perfil "Líder de Projeto" que gerenciam este projeto
 }
 
 export interface Demanda {
@@ -36,8 +39,8 @@ export const usuarios: Usuario[] = [
 ];
 
 export const projetos: Projeto[] = [
-  { id: 1, nome: "Projeto Alfa" },
-  { id: 2, nome: "Projeto Beta" },
+  { id: 1, nome: "Projeto Alfa", liderIds: [2] },
+  { id: 2, nome: "Projeto Beta", liderIds: [] },
 ];
 
 export const demandas: Demanda[] = [
@@ -92,5 +95,18 @@ export const demandas: Demanda[] = [
     criadaEm: "2026-09-20",
     atualizadaEm: "2026-09-30",
     prazoFinalizacao: null,
+  },
+  {
+    id: 5,
+    titulo: "Criar validação de prazo com feriados",
+    descricao: "Consultar API de feriados nacionais ao salvar a demanda",
+    tipo: "Tarefa",
+    prioridade: "Alta",
+    status: "Aberta",
+    projetoId: 1,
+    responsavelId: 3,
+    criadaEm: "2026-11-01",
+    atualizadaEm: "2026-11-01",
+    prazoFinalizacao: "2026-11-20",
   },
 ];
