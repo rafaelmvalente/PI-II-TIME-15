@@ -26,6 +26,5 @@ export function autenticar(req: Request, res: Response, next: NextFunction) {
   }
 
   req.usuario = usuario;
-  req.token = token;
   next();
 }

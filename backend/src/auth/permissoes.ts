@@ -37,15 +37,6 @@ const PERMISSOES: Record<Perfil, Acao[]> = {
   "Membro da Equipe": ["alterarStatus", "comentar"],
 };
 
-// Ciclo de vida da demanda: transições válidas para QUALQUER perfil
-const TRANSICOES_VALIDAS: Record<Status, Status[]> = {
-  "Aberta": ["Em andamento", "Cancelada"],
-  "Em andamento": ["Em revisão", "Cancelada"],
-  "Em revisão": ["Concluída", "Em andamento", "Cancelada"],
-  "Concluída": [],
-  "Cancelada": [],
-};
-
 // O Membro da Equipe só pode fazer estas duas transições
 const TRANSICOES_DO_MEMBRO: [Status, Status][] = [
   ["Aberta", "Em andamento"],
@@ -100,10 +91,6 @@ export function podeExecutar(
   return estaNoEscopo(usuario, alvo);
 }
 
-export function transicaoValida(de: Status, para: Status): boolean {
-  return TRANSICOES_VALIDAS[de].includes(para);
-}
-
 export function podeAlterarStatus(
   usuario: Usuario,
   demanda: Demanda,
@@ -117,5 +104,5 @@ export function podeAlterarStatus(
     );
   }
 
-  return true; // Administrador e Líder do projeto fazem todas as transições válidas
+  return true; // Administrador e Líder do projeto fazem todas as transições
 }
