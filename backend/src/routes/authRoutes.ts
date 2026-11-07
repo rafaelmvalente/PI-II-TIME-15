@@ -4,24 +4,23 @@
 
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { usuarios } from "../data/dados.js";
+import bcrypt from "bcryptjs";
+import { buscarUsuarioParaLogin } from "../db/consultas.js";
 import { criarSessao } from "../auth/sessoes.js";
 
 const router = Router();
 
-router.post("/login", (req: Request, res: Response) => {
+router.post("/login", async (req: Request, res: Response) => {
   const { email, senha } = req.body ?? {};
 
   if (typeof email !== "string" || typeof senha !== "string" || !email || !senha) {
     return res.status(400).json({ mensagem: "Informe e-mail e senha" });
   }
 
-  const usuario = usuarios.find(
-    (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-  );
+  const usuario = await buscarUsuarioParaLogin(email.trim());
 
   // Mesma mensagem para e-mail ou senha errados: não revela quais e-mails existem
-  if (!usuario || usuario.senha !== senha) {
+  if (!usuario || !(await bcrypt.compare(senha, usuario.senhaHash)))  {
     return res.status(401).json({ mensagem: "E-mail ou senha inválidos" });
   }
 

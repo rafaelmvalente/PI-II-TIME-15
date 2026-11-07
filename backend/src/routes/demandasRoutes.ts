@@ -6,20 +6,20 @@
 
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { demandas, projetos, usuarios } from "../data/dados.js";
+import { buscarDemandaPorId, buscarProjetoPorId, buscarUsuarioPorId } from "../db/consultas.js";
 import { autenticar } from "../auth/autenticar.js";
 import { podeVisualizar } from "../auth/permissoes.js";
 
 const router = Router();
 
-router.get("/demandas/:id", autenticar, (req: Request, res: Response) => {
+router.get("/demandas/:id", autenticar, async (req: Request, res: Response) => {
   const id = Number(req.params.id);
 
   if (!Number.isInteger(id)) {
     return res.status(400).json({ mensagem: "Id de demanda inválido" });
   }
 
-  const demanda = demandas.find((d) => d.id === id);
+  const demanda = await buscarDemandaPorId(id);
 
   if (!demanda) {
     return res.status(404).json({ mensagem: "Demanda não encontrada" });
@@ -29,10 +29,10 @@ router.get("/demandas/:id", autenticar, (req: Request, res: Response) => {
     return res.status(403).json({ mensagem: "Você não tem permissão para ver esta demanda" });
   }
 
-  const projeto = projetos.find((p) => p.id === demanda.projetoId) ?? null;
+  const projeto = await buscarProjetoPorId(demanda.projetoId);
 
   const responsavel = demanda.responsavelId
-    ? usuarios.find((u) => u.id === demanda.responsavelId) ?? null
+    ? await buscarUsuarioPorId(demanda.responsavelId)
     : null;
 
   return res.status(200).json({

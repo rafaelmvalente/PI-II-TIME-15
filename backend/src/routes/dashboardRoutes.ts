@@ -4,7 +4,7 @@
 
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { demandas as todasDemandas } from "../data/dados.js";
+import { listarDemandas } from "../db/consultas.js";
 import { autenticar } from "../auth/autenticar.js";
 import { podeVisualizar } from "../auth/permissoes.js";
 
@@ -30,8 +30,9 @@ function estaProximaDoPrazo(prazoFinalizacao: string | null): boolean {
   return diasRestantes <= 7;
 }
 
-router.get("/dashboard", autenticar, (req: Request, res: Response) => {
+router.get("/dashboard", autenticar, async (req: Request, res: Response) => {
   // Cada usuário vê os indicadores apenas das demandas que tem permissão de ver
+  const todasDemandas = await listarDemandas(); 
   const demandas = todasDemandas.filter((d) => podeVisualizar(req.usuario!, d));
 
   const total = demandas.length;

@@ -11,8 +11,7 @@
 //      - Líder de Projeto: nas demandas dos projetos que lidera
 //      - Membro da Equipe: nas demandas atribuídas a ele
 
-import { projetos } from "../data/dados.js";
-import type { Usuario, Demanda, Perfil } from "../data/dados.js";
+import type { Usuario, Demanda, Perfil } from "../types/modelos.js";
 
 type Status = Demanda["status"];
 
@@ -44,8 +43,8 @@ const TRANSICOES_DO_MEMBRO: [Status, Status][] = [
 ];
 
 export function lideraProjeto(usuario: Usuario, projetoId: number): boolean {
-  const projeto = projetos.find((p) => p.id === projetoId);
-  return projeto?.liderIds.includes(usuario.id) ?? false;
+  // projetosLiderados é carregado do banco uma vez, na autenticação
+  return usuario.projetosLiderados.includes(projetoId);
 }
 
 // 2. ONDE o usuário pode agir
