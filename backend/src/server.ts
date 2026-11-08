@@ -6,6 +6,7 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import demandasRoutes from './routes/demandasRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 const PORT = 3000;
@@ -16,6 +17,7 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Servidor do Sistema de Acompanhamento de Demandas está rodando!');
 });
 
+app.use('/api', authRoutes);
 app.use('/api', dashboardRoutes);
 app.use('/api', demandasRoutes);
 
