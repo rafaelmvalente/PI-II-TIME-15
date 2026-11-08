@@ -1,6 +1,8 @@
 // Autor: Mateus - RA: 25001369
 // Data: 04/11/2026
 // Descrição: Rota GET para detalhar uma demanda específica
+// Alterado por: Vinicius Santuci Virgolino - RA: 25000294 (05/11/2026)
+// - Rota passa a exigir login e respeitar as permissões de cada perfil
 
 // Autores: Mateus - RA: 25001369 e Vinicius Santucci - RA: 25000294
 // Data: 07/11/2026
@@ -10,6 +12,8 @@ import { Router } from "express";
 import type { Request, Response } from "express";
 import { demandas, projetos, usuarios } from "../data/dados.js";
 import type { Demanda } from "../data/dados.js";
+import { autenticar } from "../auth/autenticar.js";
+import { podeVisualizar } from "../auth/permissoes.js";
 
 const router = Router();
 
@@ -30,7 +34,7 @@ function isStatusValido(valor: unknown): valor is Status {
   );
 }
 
-router.get("/demandas/:id", (req: Request, res: Response) => {
+router.get("/demandas/:id", autenticar, (req: Request, res: Response) => {
   const id = Number(req.params.id);
 
   if (!Number.isInteger(id)) {
@@ -41,6 +45,10 @@ router.get("/demandas/:id", (req: Request, res: Response) => {
 
   if (!demanda) {
     return res.status(404).json({ mensagem: "Demanda não encontrada" });
+  }
+
+  if (!podeVisualizar(req.usuario!, demanda)) {
+    return res.status(403).json({ mensagem: "Você não tem permissão para ver esta demanda" });
   }
 
   const projeto = projetos.find((p) => p.id === demanda.projetoId) ?? null;
@@ -63,7 +71,7 @@ router.get("/demandas/:id", (req: Request, res: Response) => {
   });
 });
 
-router.patch("/demandas/:id/status", (req: Request, res: Response) => {
+router.patch("/demandas/:id/status", autenticar, (req: Request, res: Response) => {
   const id = Number(req.params.id);
 
   if (!Number.isInteger(id)) {
@@ -80,6 +88,10 @@ router.patch("/demandas/:id/status", (req: Request, res: Response) => {
 
   if (!demanda) {
     return res.status(404).json({ mensagem: "Demanda não encontrada" });
+  }
+
+  if (!podeVisualizar(req.usuario!, demanda)) {
+    return res.status(403).json({ mensagem: "Você não tem permissão para alterar esta demanda" });
   }
 
   const statusAtual = demanda.status;
