@@ -164,3 +164,26 @@ button.primary:hover {
   font-size: 12px;
   margin-top: 5px;
 }
+
+/* Esconde o formulário/parágrafo que não está em uso no momento */
+.hidden {
+  display: none;
+}
+
+/* Link de alternância entre "Entrar" e "Criar conta" */
+.switch-auth {
+  margin: 16px 0 0;
+  font-size: 13px;
+  text-align: center;
+  color: #4b5563;
+}
+
+.switch-auth a {
+  color: #4f46e5;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.switch-auth a:hover {
+  text-decoration: underline;
+}

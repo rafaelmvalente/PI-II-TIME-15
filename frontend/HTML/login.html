@@ -1,6 +1,6 @@
 <!-- Autor: Rafael Mendes Valente - RA: 25002875-->
 <!-- Data: 23/08/2026 -->
-<!-- Descrição: Página de login do sistema de acompanhamento de demandas -->  
+<!-- Descrição: Página de login do sistema de acompanhamento de demandas -->
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -34,7 +34,7 @@
   <section class="auth">
     <div class="auth-card">
 
-      <h2 class="auth-title">Entrar</h2> 
+      <h2 class="auth-title" id="authTitle">Entrar</h2>
 
       <!-- Formulário responsável pelo envio das credenciais do usuário -->
       <form id="loginForm">
@@ -78,6 +78,74 @@
         <!-- Botão responsável pelo envio do formulário de login -->
         <button type="submit" class="primary" id="submitBtn">Entrar</button>
       </form>
+
+      <!-- Formulário de criação de conta. Fica escondido até o usuário
+           clicar em "Criar conta"; todo usuário criado aqui entra como
+           Membro da Equipe, sem projeto vinculado. -->
+      <form id="cadastroForm" class="hidden">
+
+        <div class="field" id="nomeField">
+          <label for="nome">Nome completo</label>
+          <input
+            type="text"
+            id="nome"
+            name="nome"
+            placeholder="Seu nome completo"
+            autocomplete="name"
+            required
+          >
+        </div>
+
+        <div class="field" id="emailCadastroField">
+          <label for="emailCadastro">E-mail</label>
+          <input
+            type="email"
+            id="emailCadastro"
+            name="email"
+            placeholder="nome@puccampinas.edu.br"
+            autocomplete="username"
+            required
+          >
+        </div>
+
+        <div class="field" id="senhaCadastroField">
+          <label for="senhaCadastro">Senha</label>
+          <input
+            type="password"
+            id="senhaCadastro"
+            name="senha"
+            placeholder="********"
+            autocomplete="new-password"
+            required
+            minlength="6"
+            maxlength="30"
+          >
+        </div>
+
+        <div class="field" id="confirmarSenhaField">
+          <label for="confirmarSenha">Confirmar senha</label>
+          <input
+            type="password"
+            id="confirmarSenha"
+            name="confirmarSenha"
+            placeholder="********"
+            autocomplete="new-password"
+            required
+            minlength="6"
+            maxlength="30"
+          >
+        </div>
+
+        <button type="submit" class="primary" id="cadastrarBtn">Criar conta</button>
+      </form>
+
+      <!-- Alterna entre o formulário de login e o de criação de conta -->
+      <p class="switch-auth" id="switchParaCadastro">
+        Não tem conta? <a href="#" id="toggleCadastro">Criar conta</a>
+      </p>
+      <p class="switch-auth hidden" id="switchParaLogin">
+        Já tem conta? <a href="#" id="toggleLogin">Entrar</a>
+      </p>
 
     </div>
   </section>
