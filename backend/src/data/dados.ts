@@ -16,6 +16,7 @@ export interface Projeto {
   id: number;
   nome: string;
   liderIds: number[]; // usuários com perfil "Líder de Projeto" que gerenciam este projeto
+  membroIds: number[]; // usuários com perfil "Membro da Equipe" vinculados a este projeto
 }
 
 export interface EventoHistorico {
@@ -52,8 +53,8 @@ export const usuarios: Usuario[] = [
 ];
 
 export const projetos: Projeto[] = [
-  { id: 1, nome: "Projeto Alfa", liderIds: [2] },
-  { id: 2, nome: "Projeto Beta", liderIds: [] },
+  { id: 1, nome: "Projeto Alfa", liderIds: [2], membroIds: [] },
+  { id: 2, nome: "Projeto Beta", liderIds: [], membroIds: [3] },
 ];
 
 export const demandas: Demanda[] = [
