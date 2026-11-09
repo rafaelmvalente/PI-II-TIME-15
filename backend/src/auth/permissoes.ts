@@ -10,12 +10,6 @@
 //      - Administrador: em qualquer demanda
 //      - Líder de Projeto: nas demandas dos projetos que lidera
 //      - Membro da Equipe: nas demandas atribuídas a ele
-//
-// Alterado por: Mateus - RA: 25001369 (09/11/2026)
-// - podeAlterarStatus() voltou a validar a sequência do ciclo de vida
-//   (Documento de Visão, item 2.2.4) para TODOS os perfis, não só o
-//   Membro da Equipe. Antes, Administrador e Líder podiam pular etapas
-//   (ex.: Em andamento -> Concluída direto), o que não é permitido.
 
 import { projetos } from "../data/dados.js";
 import type { Usuario, Demanda, Perfil } from "../data/dados.js";
