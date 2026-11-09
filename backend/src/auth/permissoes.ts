@@ -3,11 +3,6 @@
 // Descrição: Regras de permissão dos perfis Administrador, Líder de Projeto
 // e Membro da Equipe. Este arquivo só responde "pode" ou "não pode";
 // quem devolve o erro HTTP são as rotas.
-// Alterado por: Mateus - RA: 25001369 (09/11/2026)
-// - Membro da Equipe passa a enxergar as demandas do(s) projeto(s) ao qual
-//   está vinculado (membroIds), não só as que lhe foram atribuídas
-// - Adicionada projetosVisiveis(), usada para restringir GET /projetos e
-//   GET /usuarios ao escopo de cada perfil
 //
 // Toda permissão responde duas perguntas:
 //   1. O QUE o perfil pode fazer?   -> tabela PERMISSOES
