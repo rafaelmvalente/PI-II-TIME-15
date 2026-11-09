@@ -23,6 +23,8 @@ import {
   STATUS_POR_SLUG,
   PRIORIDADE_POR_SLUG,
   TIPO_POR_SLUG,
+  ORDEM_PRIORIDADE,
+  ORDEM_STATUS,
 } from "../data/mapeamentos.js";
 
 const router = Router();
@@ -69,12 +71,22 @@ function montarDemandaResumida(demanda: Demanda) {
   };
 }
 
-// GET /demandas — lista as demandas que o usuário pode ver, com filtros
-// opcionais por querystring (status, prioridade, tipo, projetoId,
-// responsavelId, busca). Os valores de status/prioridade/tipo podem vir
-// tanto em português quanto no slug usado pelo frontend.
+// Campos aceitos em ordenarPor (item 2.3 do Documento de Visão) e como
+// comparar duas demandas por cada um deles.
+const COMPARADORES: Record<string, (a: Demanda, b: Demanda) => number> = {
+  prioridade: (a, b) => ORDEM_PRIORIDADE[a.prioridade] - ORDEM_PRIORIDADE[b.prioridade],
+  status: (a, b) => ORDEM_STATUS[a.status] - ORDEM_STATUS[b.status],
+  criadaEm: (a, b) => a.criadaEm.localeCompare(b.criadaEm),
+  // Demanda sem prazo vai para o fim da lista, em vez de confundir com uma data antiga.
+  prazoFinalizacao: (a, b) => (a.prazoFinalizacao ?? "9999-99-99").localeCompare(b.prazoFinalizacao ?? "9999-99-99"),
+};
+
+// GET /demandas — lista as demandas que o usuário pode ver, com filtros,
+// busca e ordenação opcionais por querystring. Os valores de
+// status/prioridade/tipo podem vir tanto em português quanto no slug
+// usado pelo frontend.
 router.get("/demandas", autenticar, (req: Request, res: Response) => {
-  const { status, prioridade, tipo, projetoId, responsavelId, busca } = req.query;
+  const { status, prioridade, tipo, projetoId, responsavelId, busca, ordenarPor, direcao } = req.query;
 
   const statusFiltro = typeof status === "string" && status ? (STATUS_POR_SLUG[status] ?? status) : null;
   const prioridadeFiltro = typeof prioridade === "string" && prioridade ? (PRIORIDADE_POR_SLUG[prioridade] ?? prioridade) : null;
@@ -82,6 +94,8 @@ router.get("/demandas", autenticar, (req: Request, res: Response) => {
   const projetoIdFiltro = typeof projetoId === "string" && projetoId ? Number(projetoId) : null;
   const responsavelIdFiltro = typeof responsavelId === "string" && responsavelId ? Number(responsavelId) : null;
   const buscaFiltro = typeof busca === "string" ? busca.trim().toLowerCase() : "";
+  const comparador = typeof ordenarPor === "string" ? COMPARADORES[ordenarPor] : null;
+  const sentidoInvertido = direcao === "desc";
 
   const resultado = demandas
     .filter((d) => podeVisualizar(req.usuario!, d))
@@ -90,10 +104,13 @@ router.get("/demandas", autenticar, (req: Request, res: Response) => {
     .filter((d) => !tipoFiltro || d.tipo === tipoFiltro)
     .filter((d) => !projetoIdFiltro || d.projetoId === projetoIdFiltro)
     .filter((d) => !responsavelIdFiltro || d.responsavelId === responsavelIdFiltro)
-    .filter((d) => !buscaFiltro || d.titulo.toLowerCase().includes(buscaFiltro) || d.descricao.toLowerCase().includes(buscaFiltro))
-    .map(montarDemandaResumida);
+    .filter((d) => !buscaFiltro || d.titulo.toLowerCase().includes(buscaFiltro) || d.descricao.toLowerCase().includes(buscaFiltro));
 
-  return res.status(200).json(resultado);
+  if (comparador) {
+    resultado.sort((a, b) => (sentidoInvertido ? comparador(b, a) : comparador(a, b)));
+  }
+
+  return res.status(200).json(resultado.map(montarDemandaResumida));
 });
 
 router.get("/demandas/:id", autenticar, (req: Request, res: Response) => {
