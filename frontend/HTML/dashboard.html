@@ -8,6 +8,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — Sistema de Acompanhamento de Demandas</title>
+  <link rel="stylesheet" href="../CSS/menu.css">
   <link rel="stylesheet" href="../CSS/dashboard.css">
 </head>
 <body>
@@ -33,8 +34,6 @@
           <label for="filtroProjeto">Projeto</label>
           <select id="filtroProjeto" name="projeto">
             <option value="">Todos os projetos</option>
-            <option value="projeto1">Projeto Alfa</option>
-            <option value="projeto2">Projeto Beta</option>
           </select>
         </div>
 
@@ -75,32 +74,32 @@
     <section class="contadores">
 
       <div class="card-contador">
-        <span class="numero">0</span>
+        <span class="numero" id="numeroTotal">0</span>
         <span class="rotulo">Total de demandas</span>
       </div>
 
       <div class="card-contador">
-        <span class="numero">0</span>
+        <span class="numero" id="numeroAberta">0</span>
         <span class="rotulo">Abertas</span>
       </div>
 
       <div class="card-contador">
-        <span class="numero">0</span>
+        <span class="numero" id="numeroEmAndamento">0</span>
         <span class="rotulo">Em andamento</span>
       </div>
 
       <div class="card-contador">
-        <span class="numero">0</span>
+        <span class="numero" id="numeroEmRevisao">0</span>
         <span class="rotulo">Em revisão</span>
       </div>
 
       <div class="card-contador">
-        <span class="numero">0</span>
+        <span class="numero" id="numeroConcluida">0</span>
         <span class="rotulo">Concluídas</span>
       </div>
 
       <div class="card-contador">
-        <span class="numero">0</span>
+        <span class="numero" id="numeroCancelada">0</span>
         <span class="rotulo">Canceladas</span>
       </div>
 
@@ -116,10 +115,10 @@
       <div class="grupo">
         <h3>Demandas por prioridade</h3>
         <ul class="lista-contagem">
-          <li><span>Crítica</span><span>0</span></li>
-          <li><span>Alta</span><span>0</span></li>
-          <li><span>Média</span><span>0</span></li>
-          <li><span>Baixa</span><span>0</span></li>
+          <li><span>Crítica</span><span id="numeroCritica">0</span></li>
+          <li><span>Alta</span><span id="numeroAlta">0</span></li>
+          <li><span>Média</span><span id="numeroMedia">0</span></li>
+          <li><span>Baixa</span><span id="numeroBaixa">0</span></li>
         </ul>
       </div>
 
@@ -127,10 +126,10 @@
       <div class="grupo">
         <h3>Demandas por tipo</h3>
         <ul class="lista-contagem">
-          <li><span>Tarefa</span><span>0</span></li>
-          <li><span>Defeito</span><span>0</span></li>
-          <li><span>Melhoria</span><span>0</span></li>
-          <li><span>Documentação</span><span>0</span></li>
+          <li><span>Tarefa</span><span id="numeroTarefa">0</span></li>
+          <li><span>Defeito</span><span id="numeroDefeito">0</span></li>
+          <li><span>Melhoria</span><span id="numeroMelhoria">0</span></li>
+          <li><span>Documentação</span><span id="numeroDocumentacao">0</span></li>
         </ul>
       </div>
 
@@ -152,24 +151,11 @@
             <th>Prazo</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-        </tbody>
+        <tbody id="corpoCriticasEmAberto"></tbody>
       </table>
     </section>
 
-    <!-- 
+    <!--
          Demandas próximas do prazo de finalização
          Lista de demandas cujo prazo está se aproximando,
          independente da prioridade.
@@ -185,25 +171,14 @@
             <th>Prazo</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-        </tbody>
+        <tbody id="corpoProximasDoPrazo"></tbody>
       </table>
     </section>
 
   </div>
 
+  <script src="../JS/api.js"></script>
+  <script src="../JS/menu.js"></script>
   <script src="../JS/dashboard.js"></script>
 
 </body>

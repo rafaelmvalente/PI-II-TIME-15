@@ -18,6 +18,17 @@ export interface Projeto {
   liderIds: number[]; // usuários com perfil "Líder de Projeto" que gerenciam este projeto
 }
 
+export interface EventoHistorico {
+  texto: string;
+  data: string;
+}
+
+export interface Comentario {
+  autorId: number;
+  texto: string;
+  data: string;
+}
+
 export interface Demanda {
   id: number;
   titulo: string;
@@ -30,6 +41,8 @@ export interface Demanda {
   criadaEm: string;
   atualizadaEm: string;
   prazoFinalizacao: string | null;
+  historico: EventoHistorico[];
+  comentarios: Comentario[];
 }
 
 export const usuarios: Usuario[] = [
@@ -56,6 +69,8 @@ export const demandas: Demanda[] = [
     criadaEm: "2026-10-10",
     atualizadaEm: "2026-10-12",
     prazoFinalizacao: "2026-10-22",
+    historico: [{ texto: "Demanda criada.", data: "2026-10-10" }],
+    comentarios: [],
   },
   {
     id: 2,
@@ -69,6 +84,8 @@ export const demandas: Demanda[] = [
     criadaEm: "2026-10-08",
     atualizadaEm: "2026-10-08",
     prazoFinalizacao: "2026-10-25",
+    historico: [{ texto: "Demanda criada.", data: "2026-10-08" }],
+    comentarios: [],
   },
   {
     id: 3,
@@ -82,6 +99,8 @@ export const demandas: Demanda[] = [
     criadaEm: "2026-09-28",
     atualizadaEm: "2026-10-05",
     prazoFinalizacao: "2026-10-05",
+    historico: [{ texto: "Demanda criada.", data: "2026-09-28" }],
+    comentarios: [],
   },
   {
     id: 4,
@@ -95,5 +114,7 @@ export const demandas: Demanda[] = [
     criadaEm: "2026-09-20",
     atualizadaEm: "2026-09-30",
     prazoFinalizacao: null,
+    historico: [{ texto: "Demanda criada.", data: "2026-09-20" }],
+    comentarios: [],
   },
 ];

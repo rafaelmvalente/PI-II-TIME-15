@@ -148,3 +148,12 @@ button.secundario:hover {
     flex-direction: column;
   }
 }
+
+.mensagem-api {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+.mensagem-api.mensagem-erro {
+  color: #dc2626;
+}

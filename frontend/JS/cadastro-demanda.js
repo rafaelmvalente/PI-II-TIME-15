@@ -2,8 +2,72 @@
 // Data: 21/09/2026
 // Descrição: Validações em JavaScript do formulário de cadastro/edição de demanda
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  exigirLogin();
+
   const form = document.getElementById('formDemanda');
+  const selectProjeto = document.getElementById('projeto');
+  const selectResponsavel = document.getElementById('responsavel');
+  const idDemandaEditando = new URLSearchParams(window.location.search).get('id');
+
+  // Mensagem de erro/sucesso vinda da API, mostrada acima dos botões.
+  const mensagemApi = document.createElement('p');
+  mensagemApi.className = 'mensagem-api';
+  form.querySelector('.acoes-formulario').insertAdjacentElement('beforebegin', mensagemApi);
+
+  // Carrega projetos e usuários reais pra preencher os selects (antes eram
+  // opções fixas no HTML).
+  async function carregarListas() {
+    const [projetos, usuarios] = await Promise.all([
+      apiFetch('/projetos'),
+      apiFetch('/usuarios'),
+    ]);
+
+    projetos.forEach((projeto) => {
+      const opcao = document.createElement('option');
+      opcao.value = projeto.id;
+      opcao.textContent = projeto.nome;
+      selectProjeto.appendChild(opcao);
+    });
+
+    usuarios.forEach((usuario) => {
+      const opcao = document.createElement('option');
+      opcao.value = usuario.id;
+      opcao.textContent = usuario.nome;
+      selectResponsavel.appendChild(opcao);
+    });
+  }
+
+  // Se a tela foi aberta para edição (cadastro-demanda.html?id=3), busca os
+  // dados da demanda e preenche o formulário.
+  async function carregarDemandaParaEdicao() {
+    if (!idDemandaEditando) return;
+
+    const demanda = await apiFetch(`/demandas/${idDemandaEditando}`);
+    document.getElementById('titulo').value = demanda.titulo;
+    document.getElementById('descricao').value = demanda.descricao;
+    selectProjeto.value = demanda.projetoId;
+    selectResponsavel.value = demanda.responsavelId ?? '';
+    document.getElementById('prazo').value = demanda.prazoFinalizacao ?? '';
+
+    const slugPorValorPt = {
+      tipo: { Tarefa: 'tarefa', Defeito: 'defeito', Melhoria: 'melhoria', 'Documentação': 'documentacao' },
+      prioridade: { 'Crítica': 'critica', Alta: 'alta', 'Média': 'media', Baixa: 'baixa' },
+    };
+    document.getElementById('tipo').value = slugPorValorPt.tipo[demanda.tipo];
+    document.getElementById('prioridade').value = slugPorValorPt.prioridade[demanda.prioridade];
+
+    document.querySelector('.cadastro-header h2').textContent = 'Editar Demanda';
+    document.getElementById('btnSalvar').textContent = 'Salvar alterações';
+  }
+
+  try {
+    await carregarListas();
+    await carregarDemandaParaEdicao();
+  } catch (erro) {
+    mensagemApi.textContent = erro.message;
+    mensagemApi.classList.add('mensagem-erro');
+  }
 
   // Cada campo descreve sua própria regra de validação: qual evento dispara
   // a checagem e uma função que recebe o valor e retorna a mensagem de erro
@@ -105,12 +169,37 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Impede o envio do formulário enquanto houver campos inválidos.
-  form.addEventListener('submit', (evento) => {
+  form.addEventListener('submit', async (evento) => {
     evento.preventDefault();
-    if (validarTudo()) {
-      alert('Demanda validada com sucesso! (integração com backend será feita em etapa posterior)');
-    } else {
-      alert('Corrija os campos destacados antes de salvar a demanda.');
+    mensagemApi.textContent = '';
+    mensagemApi.classList.remove('mensagem-erro');
+
+    if (!validarTudo()) {
+      mensagemApi.textContent = 'Corrija os campos destacados antes de salvar a demanda.';
+      mensagemApi.classList.add('mensagem-erro');
+      return;
+    }
+
+    const corpo = {
+      titulo: regras.titulo.elemento.value,
+      descricao: regras.descricao.elemento.value,
+      tipo: regras.tipo.elemento.value,
+      prioridade: regras.prioridade.elemento.value,
+      projetoId: Number(regras.projeto.elemento.value),
+      responsavelId: selectResponsavel.value ? Number(selectResponsavel.value) : null,
+      prazoFinalizacao: regras.prazo.elemento.value || null,
+    };
+
+    try {
+      if (idDemandaEditando) {
+        await apiFetch(`/demandas/${idDemandaEditando}`, { method: 'PUT', body: JSON.stringify(corpo) });
+      } else {
+        await apiFetch('/demandas', { method: 'POST', body: JSON.stringify(corpo) });
+      }
+      window.location.href = 'listagem-demandas.html';
+    } catch (erro) {
+      mensagemApi.textContent = erro.message;
+      mensagemApi.classList.add('mensagem-erro');
     }
   });
 

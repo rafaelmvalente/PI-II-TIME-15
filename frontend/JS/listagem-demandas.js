@@ -3,20 +3,14 @@
 // Descrição: Comportamento e validações em JavaScript da tela de listagem de
 //            demandas — busca textual, filtros (status, prioridade, tipo,
 //            responsável, projeto), ordenação dos resultados e validação do
-//            campo de busca. A integração com o backend real (Node.js) será
-//            feita em etapa posterior; por ora os dados exibidos são mock.
+//            campo de busca.
+// Alterado por: Mateus - RA: 25001369 (09/11/2026)
+// - Dados passam a vir da API (GET /api/demandas) em vez de um array mock
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  exigirLogin();
 
-  // Dados de exemplo — serão substituídos pela chamada ao backend quando a
-  // API de demandas estiver disponível.
-  const demandas = [
-    { titulo: 'Corrigir erro no login', tipo: 'defeito', prioridade: 'critica', status: 'em_andamento', projeto: 'projeto1', responsavel: 'Rafael', criadaEm: '2026-09-10', prazo: '2026-09-30' },
-    { titulo: 'Criar tela de cadastro de demanda', tipo: 'tarefa', prioridade: 'alta', status: 'concluida', projeto: 'projeto1', responsavel: 'Vinicius', criadaEm: '2026-09-05', prazo: '2026-09-20' },
-    { titulo: 'Melhorar responsividade do dashboard', tipo: 'melhoria', prioridade: 'media', status: 'aberta', projeto: 'projeto2', responsavel: 'Tiago', criadaEm: '2026-09-15', prazo: '2026-10-05' },
-    { titulo: 'Atualizar documentação da API', tipo: 'documentacao', prioridade: 'baixa', status: 'em_revisao', projeto: 'projeto2', responsavel: 'Rodrigo', criadaEm: '2026-09-12', prazo: '2026-10-10' },
-    { titulo: 'Adicionar validação de senha', tipo: 'tarefa', prioridade: 'alta', status: 'aberta', projeto: 'projeto1', responsavel: 'Mateus', criadaEm: '2026-09-20', prazo: '2026-10-01' },
-  ];
+  let demandas = [];
 
   const campoBusca = document.getElementById('campoBusca');
   const erroBusca = document.getElementById('erroBusca');
@@ -33,8 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
     tipo: { tarefa: 'Tarefa', defeito: 'Defeito', melhoria: 'Melhoria', documentacao: 'Documentação' },
     prioridade: { critica: 'Crítica', alta: 'Alta', media: 'Média', baixa: 'Baixa' },
     status: { aberta: 'Aberta', em_andamento: 'Em andamento', em_revisao: 'Em revisão', concluida: 'Concluída', cancelada: 'Cancelada' },
-    projeto: { projeto1: 'Projeto A', projeto2: 'Projeto B' },
   };
+
+  const slugPorTipo = { Tarefa: 'tarefa', Defeito: 'defeito', Melhoria: 'melhoria', 'Documentação': 'documentacao' };
+  const slugPorPrioridade = { 'Crítica': 'critica', Alta: 'alta', 'Média': 'media', Baixa: 'baixa' };
+  const slugPorStatus = { Aberta: 'aberta', 'Em andamento': 'em_andamento', 'Em revisão': 'em_revisao', 'Concluída': 'concluida', Cancelada: 'cancelada' };
 
   // Evita que um título com caracteres especiais quebre o HTML gerado.
   function escapar(texto) {
@@ -48,13 +45,21 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${dia}/${mes}/${ano}`;
   }
 
-  // Preenche o filtro de responsáveis a partir dos dados existentes, em vez
-  // de fixar nomes no HTML (evita repetição e mantém a lista sempre atual).
-  function preencherResponsaveis() {
-    const responsaveis = [...new Set(demandas.map((d) => d.responsavel))].sort();
-    responsaveis.forEach((nome) => {
+  // Preenche os filtros de projeto e responsável a partir dos dados
+  // retornados pela API, em vez de fixar opções no HTML.
+  function preencherFiltrosDinamicos() {
+    const projetos = new Map(demandas.map((d) => [d.projeto?.id, d.projeto?.nome]).filter(([id]) => id));
+    [...projetos.entries()].sort((a, b) => a[1].localeCompare(b[1])).forEach(([id, nome]) => {
       const opcao = document.createElement('option');
-      opcao.value = nome;
+      opcao.value = id;
+      opcao.textContent = nome;
+      filtroProjeto.appendChild(opcao);
+    });
+
+    const responsaveis = new Map(demandas.map((d) => [d.responsavel?.id, d.responsavel?.nome]).filter(([id]) => id));
+    [...responsaveis.entries()].sort((a, b) => a[1].localeCompare(b[1])).forEach(([id, nome]) => {
+      const opcao = document.createElement('option');
+      opcao.value = id;
       opcao.textContent = nome;
       filtroResponsavel.appendChild(opcao);
     });
@@ -75,25 +80,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const status = filtroStatus.value;
     const prioridade = filtroPrioridade.value;
     const tipo = filtroTipo.value;
-    const responsavel = filtroResponsavel.value;
-    const projeto = filtroProjeto.value;
+    const responsavelId = filtroResponsavel.value;
+    const projetoId = filtroProjeto.value;
     const ordenarPor = filtroOrdenar.value;
 
     let resultado = demandas.filter((d) => {
       return (!termoBusca || d.titulo.toLowerCase().includes(termoBusca))
-        && (!status || d.status === status)
-        && (!prioridade || d.prioridade === prioridade)
-        && (!tipo || d.tipo === tipo)
-        && (!responsavel || d.responsavel === responsavel)
-        && (!projeto || d.projeto === projeto);
+        && (!status || slugPorStatus[d.status] === status)
+        && (!prioridade || slugPorPrioridade[d.prioridade] === prioridade)
+        && (!tipo || slugPorTipo[d.tipo] === tipo)
+        && (!responsavelId || String(d.responsavel?.id) === responsavelId)
+        && (!projetoId || String(d.projeto?.id) === projetoId);
     });
 
     if (ordenarPor) {
-      const ordemPrioridade = { critica: 0, alta: 1, media: 2, baixa: 3 };
+      const ordemPrioridade = { 'Crítica': 0, Alta: 1, 'Média': 2, Baixa: 3 };
       resultado = [...resultado].sort((a, b) => {
         if (ordenarPor === 'prioridade') return ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade];
         if (ordenarPor === 'data_criacao') return new Date(a.criadaEm) - new Date(b.criadaEm);
-        if (ordenarPor === 'prazo') return new Date(a.prazo) - new Date(b.prazo);
+        if (ordenarPor === 'prazo') return new Date(a.prazoFinalizacao ?? '9999-12-31') - new Date(b.prazoFinalizacao ?? '9999-12-31');
         if (ordenarPor === 'status') return a.status.localeCompare(b.status);
         return 0;
       });
@@ -110,21 +115,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     lista.forEach((d) => {
       const linha = document.createElement('tr');
+      linha.classList.add('linha-clicavel');
       linha.innerHTML = `
         <td>${escapar(d.titulo)}</td>
-        <td>${rotulos.tipo[d.tipo]}</td>
-        <td><span class="tag tag-${d.prioridade}">${rotulos.prioridade[d.prioridade]}</span></td>
-        <td>${rotulos.status[d.status]}</td>
-        <td>${rotulos.projeto[d.projeto] ?? escapar(d.projeto)}</td>
-        <td>${escapar(d.responsavel)}</td>
+        <td>${d.tipo}</td>
+        <td><span class="tag tag-${slugPorPrioridade[d.prioridade]}">${d.prioridade}</span></td>
+        <td>${d.status}</td>
+        <td>${escapar(d.projeto?.nome ?? '')}</td>
+        <td>${escapar(d.responsavel?.nome ?? 'Sem responsável')}</td>
         <td>${formatarData(d.criadaEm)}</td>
-        <td>${formatarData(d.prazo)}</td>
+        <td>${d.prazoFinalizacao ? formatarData(d.prazoFinalizacao) : '—'}</td>
       `;
+      linha.addEventListener('click', () => {
+        window.location.href = `detalhes-demanda.html?id=${d.id}`;
+      });
       corpoTabela.appendChild(linha);
     });
   }
 
-  preencherResponsaveis();
+  try {
+    demandas = await apiFetch('/demandas');
+  } catch (erro) {
+    mensagemVazio.textContent = erro.message;
+    mensagemVazio.hidden = false;
+    return;
+  }
+
+  preencherFiltrosDinamicos();
 
   campoBusca.addEventListener('input', () => {
     validarBusca(campoBusca.value);

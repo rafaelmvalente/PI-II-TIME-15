@@ -9,6 +9,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Demandas — Sistema de Acompanhamento de Demandas</title>
+  <link rel="stylesheet" href="../CSS/menu.css">
   <link rel="stylesheet" href="../CSS/listagem-demandas.css">
 </head>
 <body>
@@ -67,11 +68,9 @@
         <option value="">Responsável</option>
       </select>
 
-      <!-- Filtro por projeto -->
+      <!-- Filtro por projeto (preenchido dinamicamente pelo JS) -->
       <select id="filtroProjeto" class="filtro">
         <option value="">Projeto</option>
-        <option value="projeto1">Projeto A</option>
-        <option value="projeto2">Projeto B</option>
       </select>
 
       <!-- Ordenação dos resultados -->
@@ -116,6 +115,8 @@
 
   </div>
 
+  <script src="../JS/api.js"></script>
+  <script src="../JS/menu.js"></script>
   <script src="../JS/listagem-demandas.js" defer></script>
 </body>
 </html>

@@ -3,8 +3,91 @@
 // Descrição: Validações em JavaScript do formulário de filtro do Dashboard
 
 document.addEventListener("DOMContentLoaded", function () {
+  exigirLogin();
 
   var form = document.getElementById("filtroDashboardForm");
+
+  var filtroProjeto = document.getElementById("filtroProjeto");
+
+  var rotuloPorStatus = {
+    aberta: "numeroAberta",
+    emAndamento: "numeroEmAndamento",
+    emRevisao: "numeroEmRevisao",
+    concluida: "numeroConcluida",
+    cancelada: "numeroCancelada",
+  };
+  var rotuloPorPrioridade = { critica: "numeroCritica", alta: "numeroAlta", media: "numeroMedia", baixa: "numeroBaixa" };
+  var rotuloPorTipo = { tarefa: "numeroTarefa", defeito: "numeroDefeito", melhoria: "numeroMelhoria", documentacao: "numeroDocumentacao" };
+
+  function escapar(texto) {
+    var div = document.createElement("div");
+    div.textContent = texto || "";
+    return div.innerHTML;
+  }
+
+  function formatarData(iso) {
+    if (!iso) return "—";
+    var partes = iso.split("-");
+    return partes[2] + "/" + partes[1] + "/" + partes[0];
+  }
+
+  function preencherTabela(idTbody, linhas, colunas) {
+    var tbody = document.getElementById(idTbody);
+    tbody.innerHTML = "";
+    linhas.forEach(function (d) {
+      var tr = document.createElement("tr");
+      tr.innerHTML = colunas.map(function (coluna) { return "<td>" + coluna(d) + "</td>"; }).join("");
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function carregarDashboard(filtros) {
+    var parametros = new URLSearchParams();
+    if (filtros && filtros.projeto) parametros.set("projeto", filtros.projeto);
+    if (filtros && filtros.dataInicio) parametros.set("dataInicio", filtros.dataInicio);
+    if (filtros && filtros.dataFim) parametros.set("dataFim", filtros.dataFim);
+    if (filtros && filtros.quantidadeItens) parametros.set("quantidadeItens", filtros.quantidadeItens);
+    if (filtros && filtros.ordenarPor) parametros.set("ordenarPor", filtros.ordenarPor);
+
+    var dados = await apiFetch("/dashboard?" + parametros.toString());
+
+    document.getElementById("numeroTotal").textContent = dados.total;
+    Object.keys(rotuloPorStatus).forEach(function (chave) {
+      document.getElementById(rotuloPorStatus[chave]).textContent = dados.porStatus[chave];
+    });
+    Object.keys(rotuloPorPrioridade).forEach(function (chave) {
+      document.getElementById(rotuloPorPrioridade[chave]).textContent = dados.porPrioridade[chave];
+    });
+    Object.keys(rotuloPorTipo).forEach(function (chave) {
+      document.getElementById(rotuloPorTipo[chave]).textContent = dados.porTipo[chave];
+    });
+
+    preencherTabela("corpoCriticasEmAberto", dados.criticasEmAberto, [
+      function (d) { return escapar(d.titulo); },
+      function (d) { return d.status; },
+      function (d) { return d.responsavelNome ? escapar(d.responsavelNome) : "Sem responsável"; },
+      function (d) { return formatarData(d.prazoFinalizacao); },
+    ]);
+    preencherTabela("corpoProximasDoPrazo", dados.proximasDoPrazo, [
+      function (d) { return escapar(d.titulo); },
+      function (d) { return d.prioridade; },
+      function (d) { return d.status; },
+      function (d) { return formatarData(d.prazoFinalizacao); },
+    ]);
+  }
+
+  async function carregarProjetos() {
+    var projetos = await apiFetch("/projetos");
+    projetos.forEach(function (projeto) {
+      var opcao = document.createElement("option");
+      opcao.value = projeto.id;
+      opcao.textContent = projeto.nome;
+      filtroProjeto.appendChild(opcao);
+    });
+  }
+
+  carregarProjetos().catch(function () {});
+  carregarDashboard().catch(function (erro) { console.error(erro); });
 
   var campoDataInicio = document.getElementById("dataInicio");
   var campoDataFim = document.getElementById("dataFim");
@@ -80,13 +163,12 @@ document.addEventListener("DOMContentLoaded", function () {
       return; // bloqueia o envio enquanto houver dado inválido
     }
 
-    // confirma que o filtro passou na validação
-    console.log("Filtro válido:", {
+    carregarDashboard({
       projeto: document.getElementById("filtroProjeto").value,
       dataInicio: dataInicio,
       dataFim: dataFim,
       quantidadeItens: quantidade,
       ordenarPor: ordenacaoSelecionada.value,
-    });
+    }).catch(function (erro) { console.error(erro); });
   });
 });
