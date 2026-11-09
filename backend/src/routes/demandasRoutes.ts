@@ -7,6 +7,10 @@
 // Alterado por: Mateus - RA: 25001369 (09/11/2026)
 // - Adicionadas as rotas de listagem, criação, edição, alteração de
 //   status, cancelamento e comentários (integração com o frontend)
+// Alterado por: Mateus - RA: 25001369 (09/11/2026)
+// - POST /demandas e PUT /demandas/:id passam a validar o prazo de
+//   finalização contra a API de feriados nacionais (item 2.2.5 do
+//   Documento de Visão)
 
 import { Router } from "express";
 import type { Request, Response } from "express";
@@ -26,11 +30,36 @@ import {
   ORDEM_PRIORIDADE,
   ORDEM_STATUS,
 } from "../data/mapeamentos.js";
+import { ehFeriadoNacional } from "../feriados.js";
 
 const router = Router();
 
 function hoje(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+// Valida o prazo de finalização informado, bloqueando datas que caem em
+// feriado nacional. Retorna a mensagem de erro, ou null quando o prazo é
+// válido (ou não foi informado).
+async function validarPrazoFinalizacao(prazoFinalizacao: unknown): Promise<string | null> {
+  if (!prazoFinalizacao) return null;
+
+  if (typeof prazoFinalizacao !== "string") {
+    return "O prazo de finalização deve ser uma data no formato YYYY-MM-DD";
+  }
+
+  let feriado: boolean;
+  try {
+    feriado = await ehFeriadoNacional(prazoFinalizacao);
+  } catch {
+    return "Não foi possível validar o prazo de finalização junto à API de feriados nacionais";
+  }
+
+  if (feriado) {
+    return "O prazo de finalização não pode ser um feriado nacional";
+  }
+
+  return null;
 }
 
 function montarResponsavel(responsavelId: number | null) {
@@ -134,7 +163,7 @@ router.get("/demandas/:id", autenticar, (req: Request, res: Response) => {
 });
 
 // POST /demandas — cria uma nova demanda. Status inicial é sempre "Aberta".
-router.post("/demandas", autenticar, (req: Request, res: Response) => {
+router.post("/demandas", autenticar, async (req: Request, res: Response) => {
   const { titulo, descricao, tipo, prioridade, projetoId, responsavelId, prazoFinalizacao } = req.body ?? {};
 
   if (typeof titulo !== "string" || titulo.trim().length < 5 || titulo.trim().length > 120) {
@@ -160,6 +189,11 @@ router.post("/demandas", autenticar, (req: Request, res: Response) => {
   }
   if (responsavelIdConvertido && !usuarios.some((u) => u.id === responsavelIdConvertido)) {
     return res.status(400).json({ mensagem: "Responsável inválido." });
+  }
+
+  const erroPrazo = await validarPrazoFinalizacao(prazoFinalizacao);
+  if (erroPrazo) {
+    return res.status(400).json({ mensagem: erroPrazo });
   }
 
   if (!podeExecutar(req.usuario!, "criarDemanda", { projetoId: projetoIdConvertido, responsavelId: null })) {
@@ -189,7 +223,7 @@ router.post("/demandas", autenticar, (req: Request, res: Response) => {
 });
 
 // PUT /demandas/:id — edita os campos principais de uma demanda existente.
-router.put("/demandas/:id", autenticar, (req: Request, res: Response) => {
+router.put("/demandas/:id", autenticar, async (req: Request, res: Response) => {
   const id = Number(req.params.id);
   const demanda = demandas.find((d) => d.id === id);
 
@@ -246,6 +280,10 @@ router.put("/demandas/:id", autenticar, (req: Request, res: Response) => {
     demanda.responsavelId = responsavelIdConvertido;
   }
   if (prazoFinalizacao !== undefined) {
+    const erroPrazo = await validarPrazoFinalizacao(prazoFinalizacao);
+    if (erroPrazo) {
+      return res.status(400).json({ mensagem: erroPrazo });
+    }
     demanda.prazoFinalizacao = prazoFinalizacao || null;
   }
 
