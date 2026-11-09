@@ -39,3 +39,20 @@ function inverter<T extends string>(mapa: Record<string, T>): Record<T, string> 
 export const SLUG_POR_STATUS = inverter(STATUS_POR_SLUG);
 export const SLUG_POR_PRIORIDADE = inverter(PRIORIDADE_POR_SLUG);
 export const SLUG_POR_TIPO = inverter(TIPO_POR_SLUG);
+
+// Ordem usada para ordenar por prioridade/status (não é alfabética:
+// segue a urgência e o ciclo de vida da demanda).
+export const ORDEM_PRIORIDADE: Record<Demanda["prioridade"], number> = {
+  "Crítica": 0,
+  "Alta": 1,
+  "Média": 2,
+  "Baixa": 3,
+};
+
+export const ORDEM_STATUS: Record<Demanda["status"], number> = {
+  "Aberta": 0,
+  "Em andamento": 1,
+  "Em revisão": 2,
+  "Concluída": 3,
+  "Cancelada": 4,
+};
