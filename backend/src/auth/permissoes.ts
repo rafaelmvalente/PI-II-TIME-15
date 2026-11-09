@@ -3,6 +3,11 @@
 // Descrição: Regras de permissão dos perfis Administrador, Líder de Projeto
 // e Membro da Equipe. Este arquivo só responde "pode" ou "não pode";
 // quem devolve o erro HTTP são as rotas.
+// Alterado por: Mateus - RA: 25001369 (09/11/2026)
+// - Membro da Equipe passa a enxergar as demandas do(s) projeto(s) ao qual
+//   está vinculado (membroIds), não só as que lhe foram atribuídas
+// - Adicionada projetosVisiveis(), usada para restringir GET /projetos e
+//   GET /usuarios ao escopo de cada perfil
 //
 // Toda permissão responde duas perguntas:
 //   1. O QUE o perfil pode fazer?   -> tabela PERMISSOES
@@ -48,6 +53,26 @@ export function lideraProjeto(usuario: Usuario, projetoId: number): boolean {
   return projeto?.liderIds.includes(usuario.id) ?? false;
 }
 
+// Vínculo de um Membro da Equipe ao projeto (não confundir com ser
+// responsável por uma demanda específica dentro dele).
+export function membroDoProjeto(usuario: Usuario, projetoId: number): boolean {
+  const projeto = projetos.find((p) => p.id === projetoId);
+  return projeto?.membroIds.includes(usuario.id) ?? false;
+}
+
+// Projetos que o usuário pode enxergar, de acordo com o perfil
+// (usado nas rotas GET /projetos e GET /usuarios).
+export function projetosVisiveis(usuario: Usuario) {
+  switch (usuario.perfil) {
+    case "Administrador":
+      return projetos;
+    case "Líder de Projeto":
+      return projetos.filter((p) => p.liderIds.includes(usuario.id));
+    case "Membro da Equipe":
+      return projetos.filter((p) => p.membroIds.includes(usuario.id));
+  }
+}
+
 // 2. ONDE o usuário pode agir
 function estaNoEscopo(
   usuario: Usuario,
@@ -59,7 +84,8 @@ function estaNoEscopo(
     case "Líder de Projeto":
       return lideraProjeto(usuario, alvo.projetoId);
     case "Membro da Equipe":
-      return alvo.responsavelId === usuario.id;
+      // Vê as demandas do(s) projeto(s) ao qual pertence, não só as suas.
+      return membroDoProjeto(usuario, alvo.projetoId);
   }
 }
 
