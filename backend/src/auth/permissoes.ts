@@ -37,6 +37,19 @@ const PERMISSOES: Record<Perfil, Acao[]> = {
   "Membro da Equipe": ["alterarStatus", "comentar"],
 };
 
+// Ciclo de vida da demanda: de cada status, para quais status é permitido
+// ir. Vale para todos os perfis — ninguém pula etapa (ex.: Em andamento
+// não vai direto para Concluída) nem volta de Em andamento para Aberta.
+// Cancelada e Concluída são estados finais (exceto o cancelamento, que tem
+// regra própria abaixo).
+const TRANSICOES_PERMITIDAS: Record<Status, Status[]> = {
+  "Aberta": ["Em andamento", "Cancelada"],
+  "Em andamento": ["Em revisão", "Cancelada"],
+  "Em revisão": ["Concluída", "Em andamento", "Cancelada"],
+  "Concluída": [],
+  "Cancelada": [],
+};
+
 // O Membro da Equipe só pode fazer estas duas transições
 const TRANSICOES_DO_MEMBRO: [Status, Status][] = [
   ["Aberta", "Em andamento"],
@@ -121,12 +134,20 @@ export function podeExecutar(
   return estaNoEscopo(usuario, alvo);
 }
 
+// Ninguém pula etapa do ciclo de vida, nem volta de Em andamento para
+// Aberta, independentemente do perfil. Usada pela rota para distinguir
+// "transição inválida" (409) de "sem permissão" (403).
+export function transicaoValida(statusAtual: Status, novoStatus: Status): boolean {
+  return TRANSICOES_PERMITIDAS[statusAtual].includes(novoStatus);
+}
+
 export function podeAlterarStatus(
   usuario: Usuario,
   demanda: Demanda,
   novoStatus: Status
 ): boolean {
   if (!podeExecutar(usuario, "alterarStatus", demanda)) return false;
+  if (!transicaoValida(demanda.status, novoStatus)) return false;
 
   if (usuario.perfil === "Membro da Equipe") {
     return TRANSICOES_DO_MEMBRO.some(
@@ -134,5 +155,5 @@ export function podeAlterarStatus(
     );
   }
 
-  return true; // Administrador e Líder do projeto fazem todas as transições
+  return true; // Administrador e Líder do projeto fazem as demais transições previstas
 }
