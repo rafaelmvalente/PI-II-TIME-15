@@ -109,6 +109,15 @@ export function podeExecutar(
   // Comentar é permitido em qualquer demanda que o usuário consegue ver
   if (acao === "comentar") return podeVisualizar(usuario, alvo);
 
+  // Ver o projeto inteiro não é a mesma coisa que agir sobre qualquer
+  // demanda dele: o Membro enxerga todas as demandas do seu projeto
+  // (estaNoEscopo), mas só altera status de demandas atribuídas a ele.
+  // Membro não tem as demais ações (criarDemanda, editarDemanda etc.),
+  // então isso só afeta alterarStatus na prática.
+  if (usuario.perfil === "Membro da Equipe") {
+    return alvo.responsavelId === usuario.id;
+  }
+
   return estaNoEscopo(usuario, alvo);
 }
 
