@@ -5,8 +5,19 @@
 
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { demandas, projetos, usuarios } from "../data/dados.js";
-import type { Demanda } from "../data/dados.js";
+import {
+  listarDemandas,
+  buscarDemandaPorId,
+  buscarProjetoPorId,
+  buscarUsuarioPorId,
+  listarProjetos,
+  listarUsuarios,
+  listarComentarios,
+  listarHistorico,
+} from "../db/consultas.js";
+import { criarDemanda, atualizarDemanda, adicionarComentario } from "../db/escritas.js";
+import type { Alteracao, CamposDemanda } from "../db/escritas.js";
+import type { Demanda, Projeto, UsuarioResumo } from "../types/modelos.js";
 import { autenticar } from "../auth/autenticar.js";
 import {
   podeVisualizar,
@@ -26,17 +37,13 @@ import { ehFeriadoNacional } from "../feriados.js";
 
 const router = Router();
 
-function hoje(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
 // Valida o prazo de finalização informado, bloqueando datas que caem em
 // feriado nacional. Retorna a mensagem de erro, ou null quando o prazo é
 // válido (ou não foi informado).
 async function validarPrazoFinalizacao(prazoFinalizacao: unknown): Promise<string | null> {
   if (!prazoFinalizacao) return null;
 
-  if (typeof prazoFinalizacao !== "string") {
+  if (typeof prazoFinalizacao !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(prazoFinalizacao)) {
     return "O prazo de finalização deve ser uma data no formato YYYY-MM-DD";
   }
 
@@ -54,30 +61,43 @@ async function validarPrazoFinalizacao(prazoFinalizacao: unknown): Promise<strin
   return null;
 }
 
-function montarResponsavel(responsavelId: number | null) {
-  if (!responsavelId) return null;
-  const responsavel = usuarios.find((u) => u.id === responsavelId);
-  if (!responsavel) return null;
-  return { id: responsavel.id, nome: responsavel.nome, email: responsavel.email, perfil: responsavel.perfil };
+// Nunca devolve projetosLiderados/projetosVinculados, só os dados públicos
+function resumirUsuario(usuario: UsuarioResumo): UsuarioResumo {
+  return { id: usuario.id, nome: usuario.nome, email: usuario.email, perfil: usuario.perfil };
 }
 
-function montarDemandaDetalhada(demanda: Demanda) {
-  const projeto = projetos.find((p) => p.id === demanda.projetoId) ?? null;
+// Detalhe da demanda no mesmo formato de antes: projeto, responsável,
+// histórico ({ texto, data }) e comentários (com autor).
+async function montarDemandaDetalhada(demanda: Demanda) {
+  const [projeto, responsavel, historico, comentarios] = await Promise.all([
+    buscarProjetoPorId(demanda.projetoId),
+    demanda.responsavelId ? buscarUsuarioPorId(demanda.responsavelId) : Promise.resolve(null),
+    listarHistorico(demanda.id),
+    listarComentarios(demanda.id),
+  ]);
 
   return {
     ...demanda,
     projeto,
-    responsavel: montarResponsavel(demanda.responsavelId),
-    comentarios: demanda.comentarios.map((c) => ({
-      ...c,
-      autor: montarResponsavel(c.autorId),
-    })),
+    responsavel: responsavel ? resumirUsuario(responsavel) : null,
+    historico,
+    comentarios,
   };
 }
 
-function montarDemandaResumida(demanda: Demanda) {
-  const projeto = projetos.find((p) => p.id === demanda.projetoId) ?? null;
-  const responsavel = montarResponsavel(demanda.responsavelId);
+// Relê a demanda depois de gravar, para devolver o estado salvo no banco
+async function detalharPorId(id: number) {
+  const demanda = await buscarDemandaPorId(id);
+  if (!demanda) throw new Error(`Demanda ${id} não encontrada após gravar`);
+  return montarDemandaDetalhada(demanda);
+}
+
+function montarDemandaResumida(
+  demanda: Demanda,
+  projetosPorId: Map<number, Projeto>,
+  usuariosPorId: Map<number, UsuarioResumo>
+) {
+  const responsavel = demanda.responsavelId ? usuariosPorId.get(demanda.responsavelId) : undefined;
 
   return {
     id: demanda.id,
@@ -85,11 +105,22 @@ function montarDemandaResumida(demanda: Demanda) {
     tipo: demanda.tipo,
     prioridade: demanda.prioridade,
     status: demanda.status,
-    projeto,
-    responsavel,
+    projeto: projetosPorId.get(demanda.projetoId) ?? null,
+    responsavel: responsavel ? resumirUsuario(responsavel) : null,
     criadaEm: demanda.criadaEm,
     prazoFinalizacao: demanda.prazoFinalizacao,
   };
+}
+
+// Busca a demanda do :id da URL; se não existir, já responde 404
+async function carregarDemanda(req: Request, res: Response): Promise<Demanda | null> {
+  const id = Number(req.params.id);
+  const demanda = Number.isInteger(id) ? await buscarDemandaPorId(id) : null;
+  if (!demanda) {
+    res.status(404).json({ mensagem: "Demanda não encontrada" });
+    return null;
+  }
+  return demanda;
 }
 
 // Campos aceitos em ordenarPor (item 2.3 do Documento de Visão) e como
@@ -106,7 +137,7 @@ const COMPARADORES: Record<string, (a: Demanda, b: Demanda) => number> = {
 // busca e ordenação opcionais por querystring. Os valores de
 // status/prioridade/tipo podem vir tanto em português quanto no slug
 // usado pelo frontend.
-router.get("/demandas", autenticar, (req: Request, res: Response) => {
+router.get("/demandas", autenticar, async (req: Request, res: Response) => {
   const { status, prioridade, tipo, projetoId, responsavelId, busca, ordenarPor, direcao } = req.query;
 
   const statusFiltro = typeof status === "string" && status ? (STATUS_POR_SLUG[status] ?? status) : null;
@@ -117,6 +148,10 @@ router.get("/demandas", autenticar, (req: Request, res: Response) => {
   const buscaFiltro = typeof busca === "string" ? busca.trim().toLowerCase() : "";
   const comparador = typeof ordenarPor === "string" ? COMPARADORES[ordenarPor] : null;
   const sentidoInvertido = direcao === "desc";
+
+  const [demandas, projetos, usuarios] = await Promise.all([listarDemandas(), listarProjetos(), listarUsuarios()]);
+  const projetosPorId = new Map(projetos.map((p) => [p.id, p]));
+  const usuariosPorId = new Map(usuarios.map((u) => [u.id, u]));
 
   const resultado = demandas
     .filter((d) => podeVisualizar(req.usuario!, d))
@@ -131,17 +166,17 @@ router.get("/demandas", autenticar, (req: Request, res: Response) => {
     resultado.sort((a, b) => (sentidoInvertido ? comparador(b, a) : comparador(a, b)));
   }
 
-  return res.status(200).json(resultado.map(montarDemandaResumida));
+  return res.status(200).json(resultado.map((d) => montarDemandaResumida(d, projetosPorId, usuariosPorId)));
 });
 
-router.get("/demandas/:id", autenticar, (req: Request, res: Response) => {
+router.get("/demandas/:id", autenticar, async (req: Request, res: Response) => {
   const id = Number(req.params.id);
 
   if (!Number.isInteger(id)) {
     return res.status(400).json({ mensagem: "Id de demanda inválido" });
   }
 
-  const demanda = demandas.find((d) => d.id === id);
+  const demanda = await buscarDemandaPorId(id);
 
   if (!demanda) {
     return res.status(404).json({ mensagem: "Demanda não encontrada" });
@@ -151,7 +186,7 @@ router.get("/demandas/:id", autenticar, (req: Request, res: Response) => {
     return res.status(403).json({ mensagem: "Você não tem permissão para ver esta demanda" });
   }
 
-  return res.status(200).json(montarDemandaDetalhada(demanda));
+  return res.status(200).json(await montarDemandaDetalhada(demanda));
 });
 
 // POST /demandas — cria uma nova demanda. Status inicial é sempre "Aberta".
@@ -176,10 +211,13 @@ router.post("/demandas", autenticar, async (req: Request, res: Response) => {
   if (!Object.values(PRIORIDADE_POR_SLUG).includes(prioridadeConvertida)) {
     return res.status(400).json({ mensagem: "Prioridade inválida." });
   }
-  if (!projetos.some((p) => p.id === projetoIdConvertido)) {
+  if (!Number.isInteger(projetoIdConvertido) || !(await buscarProjetoPorId(projetoIdConvertido))) {
     return res.status(400).json({ mensagem: "Projeto inválido." });
   }
-  if (responsavelIdConvertido && !usuarios.some((u) => u.id === responsavelIdConvertido)) {
+  const responsavel = responsavelIdConvertido && Number.isInteger(responsavelIdConvertido)
+    ? await buscarUsuarioPorId(responsavelIdConvertido)
+    : null;
+  if (responsavelIdConvertido && !responsavel) {
     return res.status(400).json({ mensagem: "Responsável inválido." });
   }
 
@@ -192,107 +230,116 @@ router.post("/demandas", autenticar, async (req: Request, res: Response) => {
     return res.status(403).json({ mensagem: "Você não tem permissão para criar demandas neste projeto." });
   }
 
-  const data = hoje();
-  const novaDemanda: Demanda = {
-    id: Math.max(0, ...demandas.map((d) => d.id)) + 1,
-    titulo: titulo.trim(),
-    descricao: descricao.trim(),
-    tipo: tipoConvertido,
-    prioridade: prioridadeConvertida,
-    status: "Aberta",
-    projetoId: projetoIdConvertido,
-    responsavelId: responsavelIdConvertido,
-    criadaEm: data,
-    atualizadaEm: data,
-    prazoFinalizacao: prazoFinalizacao || null,
-    historico: [{ texto: `Demanda criada por ${req.usuario!.nome}.`, data }],
-    comentarios: [],
-  };
+  const alteracoes: Alteracao[] = responsavel
+    ? [{ tipo: "Responsável", anterior: null, novo: responsavel.nome }]
+    : [];
 
-  demandas.push(novaDemanda);
+  const id = await criarDemanda(
+    {
+      titulo: titulo.trim(),
+      descricao: descricao.trim(),
+      tipo: tipoConvertido,
+      prioridade: prioridadeConvertida,
+      projetoId: projetoIdConvertido,
+      responsavelId: responsavelIdConvertido,
+      prazoFinalizacao: prazoFinalizacao || null,
+    },
+    req.usuario!.id,
+    alteracoes
+  );
 
-  return res.status(201).json(montarDemandaDetalhada(novaDemanda));
+  return res.status(201).json(await detalharPorId(id));
 });
 
 // PUT /demandas/:id — edita os campos principais de uma demanda existente.
+// Tudo é validado antes de gravar; só responsável, prioridade e prazo
+// entram no histórico (limitação da tabela tipo_alteracao).
 router.put("/demandas/:id", autenticar, async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const demanda = demandas.find((d) => d.id === id);
+  const demanda = await carregarDemanda(req, res);
+  if (!demanda) return;
 
-  if (!demanda) {
-    return res.status(404).json({ mensagem: "Demanda não encontrada" });
-  }
   if (!podeExecutar(req.usuario!, "editarDemanda", demanda)) {
     return res.status(403).json({ mensagem: "Você não tem permissão para editar esta demanda." });
   }
 
   const { titulo, descricao, tipo, prioridade, projetoId, responsavelId, prazoFinalizacao } = req.body ?? {};
+  const campos: CamposDemanda = {};
+  const alteracoes: Alteracao[] = [];
 
   if (titulo !== undefined) {
     if (typeof titulo !== "string" || titulo.trim().length < 5 || titulo.trim().length > 120) {
       return res.status(400).json({ mensagem: "O título deve ter entre 5 e 120 caracteres." });
     }
-    demanda.titulo = titulo.trim();
+    campos.titulo = titulo.trim();
   }
   if (descricao !== undefined) {
     if (typeof descricao !== "string" || descricao.trim().length < 10) {
       return res.status(400).json({ mensagem: "A descrição deve ter no mínimo 10 caracteres." });
     }
-    demanda.descricao = descricao.trim();
+    campos.descricao = descricao.trim();
   }
   if (tipo !== undefined) {
     const tipoConvertido = TIPO_POR_SLUG[tipo] ?? tipo;
     if (!Object.values(TIPO_POR_SLUG).includes(tipoConvertido)) {
       return res.status(400).json({ mensagem: "Tipo de demanda inválido." });
     }
-    demanda.tipo = tipoConvertido;
+    campos.tipo = tipoConvertido;
   }
   if (prioridade !== undefined) {
     const prioridadeConvertida = PRIORIDADE_POR_SLUG[prioridade] ?? prioridade;
     if (!Object.values(PRIORIDADE_POR_SLUG).includes(prioridadeConvertida)) {
       return res.status(400).json({ mensagem: "Prioridade inválida." });
     }
-    demanda.prioridade = prioridadeConvertida;
+    campos.prioridade = prioridadeConvertida;
+    if (prioridadeConvertida !== demanda.prioridade) {
+      alteracoes.push({ tipo: "Prioridade", anterior: demanda.prioridade, novo: prioridadeConvertida });
+    }
   }
   if (projetoId !== undefined) {
     const projetoIdConvertido = Number(projetoId);
-    if (!projetos.some((p) => p.id === projetoIdConvertido)) {
+    if (!Number.isInteger(projetoIdConvertido) || !(await buscarProjetoPorId(projetoIdConvertido))) {
       return res.status(400).json({ mensagem: "Projeto inválido." });
     }
-    demanda.projetoId = projetoIdConvertido;
+    campos.projetoId = projetoIdConvertido;
   }
   if (responsavelId !== undefined) {
     const responsavelIdConvertido = responsavelId ? Number(responsavelId) : null;
-    if (responsavelIdConvertido && !usuarios.some((u) => u.id === responsavelIdConvertido)) {
+    const novoResponsavel = responsavelIdConvertido && Number.isInteger(responsavelIdConvertido)
+      ? await buscarUsuarioPorId(responsavelIdConvertido)
+      : null;
+    if (responsavelIdConvertido && !novoResponsavel) {
       return res.status(400).json({ mensagem: "Responsável inválido." });
     }
     if (!podeExecutar(req.usuario!, "atribuirResponsavel", demanda)) {
       return res.status(403).json({ mensagem: "Você não tem permissão para atribuir o responsável." });
     }
-    demanda.responsavelId = responsavelIdConvertido;
+    campos.responsavelId = responsavelIdConvertido;
+    if (responsavelIdConvertido !== demanda.responsavelId) {
+      const anterior = demanda.responsavelId ? await buscarUsuarioPorId(demanda.responsavelId) : null;
+      alteracoes.push({ tipo: "Responsável", anterior: anterior?.nome ?? null, novo: novoResponsavel?.nome ?? null });
+    }
   }
   if (prazoFinalizacao !== undefined) {
     const erroPrazo = await validarPrazoFinalizacao(prazoFinalizacao);
     if (erroPrazo) {
       return res.status(400).json({ mensagem: erroPrazo });
     }
-    demanda.prazoFinalizacao = prazoFinalizacao || null;
+    const novoPrazo: string | null = prazoFinalizacao || null;
+    campos.prazoFinalizacao = novoPrazo;
+    if (novoPrazo !== demanda.prazoFinalizacao) {
+      alteracoes.push({ tipo: "Prazo", anterior: demanda.prazoFinalizacao, novo: novoPrazo });
+    }
   }
 
-  demanda.atualizadaEm = hoje();
-  demanda.historico.push({ texto: `${req.usuario!.nome} editou a demanda.`, data: demanda.atualizadaEm });
+  await atualizarDemanda(demanda.id, req.usuario!.id, campos, alteracoes);
 
-  return res.status(200).json(montarDemandaDetalhada(demanda));
+  return res.status(200).json(await detalharPorId(demanda.id));
 });
 
 // PATCH /demandas/:id/status — altera o status seguindo as regras de cada perfil.
-router.patch("/demandas/:id/status", autenticar, (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const demanda = demandas.find((d) => d.id === id);
-
-  if (!demanda) {
-    return res.status(404).json({ mensagem: "Demanda não encontrada" });
-  }
+router.patch("/demandas/:id/status", autenticar, async (req: Request, res: Response) => {
+  const demanda = await carregarDemanda(req, res);
+  if (!demanda) return;
 
   const { status } = req.body ?? {};
   const novoStatus = STATUS_POR_SLUG[status] ?? status;
@@ -309,25 +356,22 @@ router.patch("/demandas/:id/status", autenticar, (req: Request, res: Response) =
     return res.status(403).json({ mensagem: "Você não tem permissão para fazer essa alteração de status." });
   }
 
-  const statusAnterior = demanda.status;
-  demanda.status = novoStatus;
-  demanda.atualizadaEm = hoje();
-  demanda.historico.push({
-    texto: `${req.usuario!.nome} alterou o status da demanda de ${statusAnterior} para ${novoStatus}.`,
-    data: demanda.atualizadaEm,
-  });
+  // Ir para "Cancelada" por aqui é um cancelamento, igual à rota /cancelar
+  const alteracao: Alteracao = novoStatus === "Cancelada"
+    ? { tipo: "Cancelamento", anterior: demanda.status, novo: novoStatus }
+    : { tipo: "Status", anterior: demanda.status, novo: novoStatus };
 
-  return res.status(200).json(montarDemandaDetalhada(demanda));
+  await atualizarDemanda(demanda.id, req.usuario!.id, { status: novoStatus }, [alteracao]);
+
+  return res.status(200).json(await detalharPorId(demanda.id));
 });
 
 // POST /demandas/:id/cancelar — atalho para status = "Cancelada".
-router.post("/demandas/:id/cancelar", autenticar, (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const demanda = demandas.find((d) => d.id === id);
+// Registra só "Cancelamento" no histórico.
+router.post("/demandas/:id/cancelar", autenticar, async (req: Request, res: Response) => {
+  const demanda = await carregarDemanda(req, res);
+  if (!demanda) return;
 
-  if (!demanda) {
-    return res.status(404).json({ mensagem: "Demanda não encontrada" });
-  }
   if (!transicaoValida(demanda.status, "Cancelada")) {
     return res.status(409).json({ mensagem: "Uma demanda concluída não pode ser cancelada." });
   }
@@ -335,21 +379,18 @@ router.post("/demandas/:id/cancelar", autenticar, (req: Request, res: Response) 
     return res.status(403).json({ mensagem: "Você não tem permissão para cancelar esta demanda." });
   }
 
-  demanda.status = "Cancelada";
-  demanda.atualizadaEm = hoje();
-  demanda.historico.push({ texto: `${req.usuario!.nome} cancelou a demanda.`, data: demanda.atualizadaEm });
+  await atualizarDemanda(demanda.id, req.usuario!.id, { status: "Cancelada" }, [
+    { tipo: "Cancelamento", anterior: demanda.status, novo: "Cancelada" },
+  ]);
 
-  return res.status(200).json(montarDemandaDetalhada(demanda));
+  return res.status(200).json(await detalharPorId(demanda.id));
 });
 
 // POST /demandas/:id/comentarios — adiciona um comentário na demanda.
-router.post("/demandas/:id/comentarios", autenticar, (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const demanda = demandas.find((d) => d.id === id);
+router.post("/demandas/:id/comentarios", autenticar, async (req: Request, res: Response) => {
+  const demanda = await carregarDemanda(req, res);
+  if (!demanda) return;
 
-  if (!demanda) {
-    return res.status(404).json({ mensagem: "Demanda não encontrada" });
-  }
   if (!temPermissao(req.usuario!, "comentar") || !podeVisualizar(req.usuario!, demanda)) {
     return res.status(403).json({ mensagem: "Você não tem permissão para comentar nesta demanda." });
   }
@@ -359,13 +400,9 @@ router.post("/demandas/:id/comentarios", autenticar, (req: Request, res: Respons
     return res.status(400).json({ mensagem: "O comentário não pode ficar vazio." });
   }
 
-  demanda.comentarios.push({
-    autorId: req.usuario!.id,
-    texto: texto.trim(),
-    data: new Date().toISOString(),
-  });
+  await adicionarComentario(demanda.id, req.usuario!.id, texto.trim());
 
-  return res.status(201).json(montarDemandaDetalhada(demanda));
+  return res.status(201).json(await detalharPorId(demanda.id));
 });
 
 export default router;

@@ -3,9 +3,6 @@
 // Descrição: Tipos usados pelo backend (antes ficavam em data/dados.ts).
 // O Usuario não carrega a senha; "projetosLiderados" são os ids dos projetos
 // em que ele é líder (vem da coluna "lider" da tabela projeto_usuario).
-// Alterado por: Rodrigo Gabi - RA: 25001714 (12/11/2026)
-// - Projeto ganha membroIds (vínculos com lider = 0), como na main
-// - Tipos do histórico e dos comentários, que agora vêm do banco
 
 export type Perfil = "Administrador" | "Líder de Projeto" | "Membro da Equipe";
 

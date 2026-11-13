@@ -1,10 +1,10 @@
 // Autor: Mateus - RA: 25001369
 // Data: 09/11/2026
 // Descrição: Conversão entre os valores usados no frontend (slugs em
-// minúsculo, ex.: "em_andamento") e os valores em português usados nos
-// dados em memória (ex.: "Em andamento").
+// minúsculo, ex.: "em_andamento") e os valores em português gravados no
+// banco de dados (ex.: "Em andamento").
 
-import type { Demanda } from "./dados.js";
+import type { Demanda } from "../types/modelos.js";
 
 export const STATUS_POR_SLUG: Record<string, Demanda["status"]> = {
   aberta: "Aberta",

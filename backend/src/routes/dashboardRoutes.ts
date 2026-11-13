@@ -4,14 +4,9 @@
 
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { demandas as todasDemandas, usuarios } from "../data/dados.js";
+import { listarDemandas, listarUsuarios } from "../db/consultas.js";
 import { autenticar } from "../auth/autenticar.js";
 import { podeVisualizar } from "../auth/permissoes.js";
-
-function nomeResponsavel(responsavelId: number | null): string | null {
-  if (!responsavelId) return null;
-  return usuarios.find((u) => u.id === responsavelId)?.nome ?? null;
-}
 
 const router = Router();
 
@@ -35,8 +30,12 @@ function estaProximaDoPrazo(prazoFinalizacao: string | null): boolean {
   return diasRestantes <= 7;
 }
 
-router.get("/dashboard", autenticar, (req: Request, res: Response) => {
+router.get("/dashboard", autenticar, async (req: Request, res: Response) => {
   const { projeto, dataInicio, dataFim, quantidadeItens, ordenarPor } = req.query;
+
+  const [todasDemandas, usuarios] = await Promise.all([listarDemandas(), listarUsuarios()]);
+  const nomesPorId = new Map(usuarios.map((u) => [u.id, u.nome]));
+  const nomeResponsavel = (id: number | null) => (id ? nomesPorId.get(id) ?? null : null);
 
   const projetoIdFiltro = typeof projeto === "string" && projeto ? Number(projeto) : null;
   const dataInicioFiltro = typeof dataInicio === "string" && dataInicio ? new Date(dataInicio) : null;
