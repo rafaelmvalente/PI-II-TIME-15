@@ -2,15 +2,6 @@
 // Data: 04/11/2026
 // Descrição: Rotas de demandas (listar, detalhar, criar, editar, alterar
 // status, cancelar e comentar)
-// Alterado por: Vinicius Santuci Virgolino - RA: 25000294 (05/11/2026)
-// - Rota passa a exigir login e respeitar as permissões de cada perfil
-// Alterado por: Mateus - RA: 25001369 (09/11/2026)
-// - Adicionadas as rotas de listagem, criação, edição, alteração de
-//   status, cancelamento e comentários (integração com o frontend)
-// Alterado por: Mateus - RA: 25001369 (09/11/2026)
-// - POST /demandas e PUT /demandas/:id passam a validar o prazo de
-//   finalização contra a API de feriados nacionais (item 2.2.5 do
-//   Documento de Visão)
 
 import { Router } from "express";
 import type { Request, Response } from "express";
@@ -21,6 +12,7 @@ import {
   podeVisualizar,
   podeExecutar,
   podeAlterarStatus,
+  transicaoValida,
   temPermissao,
 } from "../auth/permissoes.js";
 import {
@@ -308,6 +300,11 @@ router.patch("/demandas/:id/status", autenticar, (req: Request, res: Response) =
   if (!Object.values(STATUS_POR_SLUG).includes(novoStatus)) {
     return res.status(400).json({ mensagem: "Status inválido." });
   }
+  if (!transicaoValida(demanda.status, novoStatus)) {
+    return res.status(409).json({
+      mensagem: `Não é possível mudar de "${demanda.status}" para "${novoStatus}".`,
+    });
+  }
   if (!podeAlterarStatus(req.usuario!, demanda, novoStatus)) {
     return res.status(403).json({ mensagem: "Você não tem permissão para fazer essa alteração de status." });
   }
@@ -330,6 +327,9 @@ router.post("/demandas/:id/cancelar", autenticar, (req: Request, res: Response) 
 
   if (!demanda) {
     return res.status(404).json({ mensagem: "Demanda não encontrada" });
+  }
+  if (!transicaoValida(demanda.status, "Cancelada")) {
+    return res.status(409).json({ mensagem: "Uma demanda concluída não pode ser cancelada." });
   }
   if (!podeAlterarStatus(req.usuario!, demanda, "Cancelada")) {
     return res.status(403).json({ mensagem: "Você não tem permissão para cancelar esta demanda." });
