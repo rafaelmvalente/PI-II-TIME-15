@@ -15,10 +15,11 @@ export interface Usuario {
   email: string;
   perfil: Perfil;
   projetosLiderados: number[];
+  projetosVinculados: number[]; // projetos em que é membro (lider = 0)
 }
 
 // Usuário sem os projetos liderados (listagens e "autor"/"responsável")
-export type UsuarioResumo = Omit<Usuario, "projetosLiderados">;
+export type UsuarioResumo = Omit<Usuario, "projetosLiderados" | "projetosVinculados">;
 
 export interface Projeto {
   id: number;

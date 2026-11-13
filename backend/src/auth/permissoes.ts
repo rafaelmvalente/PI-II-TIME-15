@@ -11,8 +11,8 @@
 //      - Líder de Projeto: nas demandas dos projetos que lidera
 //      - Membro da Equipe: nas demandas atribuídas a ele
 
-import { projetos } from "../data/dados.js";
-import type { Usuario, Demanda, Perfil } from "../types/modelos.js";
+import { listarProjetos } from "../db/consultas.js";
+import type { Usuario, Demanda, Perfil, Projeto } from "../types/modelos.js";
 
 type Status = Demanda["status"];
 
@@ -63,14 +63,15 @@ export function lideraProjeto(usuario: Usuario, projetoId: number): boolean {
 
 // Vínculo de um Membro da Equipe ao projeto (não confundir com ser
 // responsável por uma demanda específica dentro dele).
+// projetosVinculados é carregado do banco uma vez, na autenticação
 export function membroDoProjeto(usuario: Usuario, projetoId: number): boolean {
-  const projeto = projetos.find((p) => p.id === projetoId);
-  return projeto?.membroIds.includes(usuario.id) ?? false;
+  return usuario.projetosVinculados.includes(projetoId);
 }
 
 // Projetos que o usuário pode enxergar, de acordo com o perfil
 // (usado nas rotas GET /projetos e GET /usuarios).
-export function projetosVisiveis(usuario: Usuario) {
+export async function projetosVisiveis(usuario: Usuario): Promise<Projeto[]> {
+  const projetos = await listarProjetos();
   switch (usuario.perfil) {
     case "Administrador":
       return projetos;

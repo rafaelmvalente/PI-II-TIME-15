@@ -47,6 +47,13 @@ const [linhas] = await pool.query<RowDataPacket[]>(
 );
 return linhas.map((l) => l.projeto_id as number);
 }
+async function buscarProjetosVinculados(usuarioId: number): Promise<number[]> {
+const [linhas] = await pool.query<RowDataPacket[]>(
+"SELECT projeto_id FROM projeto_usuario WHERE usuario_id = ? AND lider = 0",
+[usuarioId]
+);
+return linhas.map((l) => l.projeto_id as number);
+}
 const SELECT_USUARIO = `
 SELECT u.id, u.nome, u.email, u.senha_hash AS senhaHash, p.nome AS perfil
 FROM usuario u
@@ -70,6 +77,7 @@ email: linha.email,
 senhaHash: linha.senhaHash,
 perfil: linha.perfil,
 projetosLiderados: await buscarProjetosLiderados(linha.id),
+projetosVinculados: await buscarProjetosVinculados(linha.id),
 };
 }
 export async function buscarUsuarioPorId(id: number): Promise<Usuario | null> {
@@ -86,6 +94,7 @@ nome: linha.nome,
 email: linha.email,
 perfil: linha.perfil,
 projetosLiderados: await buscarProjetosLiderados(linha.id),
+projetosVinculados: await buscarProjetosVinculados(linha.id),
 };
 }
 export async function buscarProjetoPorId(id: number): Promise<Projeto | null> {
