@@ -8,6 +8,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro/Edição de Demanda — Sistema de Acompanhamento de Demandas</title>
+  <link rel="stylesheet" href="../CSS/menu.css">
   <link rel="stylesheet" href="../CSS/cadastro-demanda.css">
 </head>
 <body>
@@ -69,20 +70,18 @@
         <div class="linha-campos">
           <div class="campo">
             <label for="projeto">Projeto</label>
+            <!-- Opções preenchidas dinamicamente por cadastro-demanda.js -->
             <select id="projeto" name="projeto" required>
               <option value="">Selecione</option>
-              <option value="projeto1">Projeto A</option>
-              <option value="projeto2">Projeto B</option>
             </select>
           </div>
 
           <div class="campo">
             <label for="responsavel">Responsável</label>
-            <!-- O responsável pode ficar em branco no momento da criação da demanda -->
+            <!-- O responsável pode ficar em branco no momento da criação da demanda.
+                 Opções preenchidas dinamicamente por cadastro-demanda.js -->
             <select id="responsavel" name="responsavel">
               <option value="">Sem responsável definido</option>
-              <option value="usuario1">Usuário 1</option>
-              <option value="usuario2">Usuário 2</option>
             </select>
           </div>
         </div>
@@ -118,6 +117,8 @@
     </section>
 
   </div>
+  <script src="../JS/api.js"></script>
+  <script src="../JS/menu.js"></script>
   <script src="../JS/cadastro-demanda.js"></script>
 </body>
 </html>

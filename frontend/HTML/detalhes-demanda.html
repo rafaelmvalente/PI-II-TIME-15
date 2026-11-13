@@ -8,6 +8,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detalhes da Demanda — Sistema de Acompanhamento de Demandas</title>
+  <link rel="stylesheet" href="../CSS/menu.css">
   <link rel="stylesheet" href="../CSS/detalhes-demanda.css">
 </head>
 <body>
@@ -24,52 +25,50 @@
 
       <div class="topo-demanda">
         <div>
-          <span class="codigo-demanda">#0001</span>
-          <h3 class="titulo-demanda">Corrigir erro no login</h3>
+          <span class="codigo-demanda" id="codigoDemanda">#0000</span>
+          <h3 class="titulo-demanda" id="tituloDemanda">Carregando...</h3>
         </div>
 
         <div class="tags-demanda">
-          <span class="tag tag-tipo">Defeito</span>
-          <span class="tag tag-critica">Crítica</span>
-          <span class="tag status-andamento">Em andamento</span>
+          <span class="tag tag-tipo" id="tagTipo"></span>
+          <span class="tag" id="tagPrioridade"></span>
+          <span class="tag" id="tagStatus"></span>
         </div>
       </div>
 
-      <p class="descricao-demanda">
-        Usuários relatam que, em alguns navegadores, o formulário de login não
-        redireciona corretamente após a autenticação, exigindo que a página
-        seja recarregada manualmente.
-      </p>
+      <p class="descricao-demanda" id="descricaoDemanda"></p>
 
       <!-- Informações complementares da demanda -->
       <div class="grade-info">
         <div class="info-item">
           <span class="rotulo">Projeto</span>
-          <span class="valor">Projeto A</span>
+          <span class="valor" id="valorProjeto"></span>
         </div>
         <div class="info-item">
           <span class="rotulo">Responsável</span>
-          <span class="valor">Usuário 1</span>
+          <span class="valor" id="valorResponsavel"></span>
         </div>
         <div class="info-item">
           <span class="rotulo">Criada em</span>
-          <span class="valor">05/09/2026</span>
+          <span class="valor" id="valorCriadaEm"></span>
         </div>
         <div class="info-item">
           <span class="rotulo">Última atualização</span>
-          <span class="valor">12/09/2026</span>
+          <span class="valor" id="valorAtualizadaEm"></span>
         </div>
         <div class="info-item">
           <span class="rotulo">Prazo de finalização</span>
-          <span class="valor">20/09/2026</span>
+          <span class="valor" id="valorPrazo"></span>
         </div>
       </div>
 
+      <p class="mensagem-api" id="mensagemApi"></p>
+
       <!-- Ações disponíveis, de acordo com o perfil do usuário logado -->
       <div class="acoes-demanda">
-        <button class="secundario">Editar</button>
-        <button class="secundario">Alterar status</button>
-        <button class="perigo">Cancelar demanda</button>
+        <button class="secundario" id="btnEditar">Editar</button>
+        <button class="secundario" id="btnAlterarStatus">Alterar status</button>
+        <button class="perigo" id="btnCancelar">Cancelar demanda</button>
       </div>
 
     </section>
@@ -77,56 +76,27 @@
     <!-- Histórico de alterações da demanda. Não é apagado nem após o cancelamento -->
     <section class="cartao-secao">
       <h3>Histórico de alterações</h3>
-      <ul class="lista-historico">
-        <li>
-          <span class="historico-texto">João alterou o status da demanda de <strong>Aberta</strong> para <strong>Em andamento</strong>.</span>
-          <span class="historico-data">06/09/2026 09:15</span>
-        </li>
-        <li>
-          <span class="historico-texto">Maria atribuiu a demanda para <strong>Usuário 1</strong>.</span>
-          <span class="historico-data">05/09/2026 17:40</span>
-        </li>
-        <li>
-          <span class="historico-texto">Demanda criada por <strong>Maria</strong>.</span>
-          <span class="historico-data">05/09/2026 14:02</span>
-        </li>
-      </ul>
+      <ul class="lista-historico" id="listaHistorico"></ul>
     </section>
 
     <!-- Comentários registrados na demanda -->
     <section class="cartao-secao">
       <h3>Comentários</h3>
 
-      <ul class="lista-comentarios">
-        <li class="comentario">
-          <div class="comentario-cabecalho">
-            <span class="comentario-autor">Usuário 1</span>
-            <span class="comentario-data">11/09/2026 10:22</span>
-          </div>
-          <p class="comentario-texto">
-            Consegui reproduzir o problema no navegador Firefox. Investigando a causa.
-          </p>
-        </li>
-        <li class="comentario">
-          <div class="comentario-cabecalho">
-            <span class="comentario-autor">Maria</span>
-            <span class="comentario-data">05/09/2026 18:10</span>
-          </div>
-          <p class="comentario-texto">
-            Priorizar essa correção, pois está afetando vários usuários.
-          </p>
-        </li>
-      </ul>
+      <ul class="lista-comentarios" id="listaComentarios"></ul>
 
       <!-- Formulário para registro de um novo comentário -->
-      <div class="novo-comentario">
-        <textarea placeholder="Escreva um comentário..." rows="3"></textarea>
-        <button class="primario">Comentar</button>
-      </div>
+      <form class="novo-comentario" id="formComentario">
+        <textarea id="textoComentario" placeholder="Escreva um comentário..." rows="3"></textarea>
+        <button type="submit" class="primario">Comentar</button>
+      </form>
 
     </section>
 
   </div>
 
+  <script src="../JS/api.js"></script>
+  <script src="../JS/menu.js"></script>
+  <script src="../JS/detalhes-demanda.js"></script>
 </body>
 </html>

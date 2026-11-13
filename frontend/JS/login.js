@@ -7,6 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const formulario = document.getElementById("loginForm");
     const email = document.getElementById("email");
     const senha = document.getElementById("password");
+    const erroLogin = document.createElement("span");
+    erroLogin.className = "erro-validacao";
+    formulario.appendChild(erroLogin);
 
 
     // Mostra uma mensagem de erro abaixo do campo
@@ -102,10 +105,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ENVIO DO FORMULÁRIO
 
-    formulario.addEventListener("submit", function (event) {
+    formulario.addEventListener("submit", async function (event) {
 
         // Impede o envio do formulário
         event.preventDefault();
+
+        erroLogin.textContent = "";
 
         const emailValido = validarEmail();
         const senhaValida = validarSenha();
@@ -113,7 +118,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Só continua se os dois campos forem válidos
         if (emailValido && senhaValida) {
-            alert("Dados validados com sucesso!");
+            try {
+                const resposta = await apiFetch("/login", {
+                    method: "POST",
+                    body: JSON.stringify({ email: email.value.trim(), senha: senha.value }),
+                });
+                salvarSessao(resposta.token, resposta.usuario);
+                window.location.href = "dashboard.html";
+            } catch (erro) {
+                erroLogin.textContent = erro.message;
+            }
         }
 
     });

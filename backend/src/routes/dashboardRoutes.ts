@@ -4,9 +4,14 @@
 
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { listarDemandas } from "../db/consultas.js";
+import { demandas as todasDemandas, usuarios } from "../data/dados.js";
 import { autenticar } from "../auth/autenticar.js";
 import { podeVisualizar } from "../auth/permissoes.js";
+
+function nomeResponsavel(responsavelId: number | null): string | null {
+  if (!responsavelId) return null;
+  return usuarios.find((u) => u.id === responsavelId)?.nome ?? null;
+}
 
 const router = Router();
 
@@ -30,10 +35,21 @@ function estaProximaDoPrazo(prazoFinalizacao: string | null): boolean {
   return diasRestantes <= 7;
 }
 
-router.get("/dashboard", autenticar, async (req: Request, res: Response) => {
+router.get("/dashboard", autenticar, (req: Request, res: Response) => {
+  const { projeto, dataInicio, dataFim, quantidadeItens, ordenarPor } = req.query;
+
+  const projetoIdFiltro = typeof projeto === "string" && projeto ? Number(projeto) : null;
+  const dataInicioFiltro = typeof dataInicio === "string" && dataInicio ? new Date(dataInicio) : null;
+  const dataFimFiltro = typeof dataFim === "string" && dataFim ? new Date(dataFim) : null;
+  const limite = typeof quantidadeItens === "string" && quantidadeItens ? Number(quantidadeItens) : 5;
+  const ordenacao = ordenarPor === "prazo" ? "prazo" : "prioridade";
+
   // Cada usuário vê os indicadores apenas das demandas que tem permissão de ver
-  const todasDemandas = await listarDemandas(); 
-  const demandas = todasDemandas.filter((d) => podeVisualizar(req.usuario!, d));
+  const demandas = todasDemandas
+    .filter((d) => podeVisualizar(req.usuario!, d))
+    .filter((d) => !projetoIdFiltro || d.projetoId === projetoIdFiltro)
+    .filter((d) => !dataInicioFiltro || new Date(d.criadaEm) >= dataInicioFiltro)
+    .filter((d) => !dataFimFiltro || new Date(d.criadaEm) <= dataFimFiltro);
 
   const total = demandas.length;
 
@@ -59,13 +75,24 @@ router.get("/dashboard", autenticar, async (req: Request, res: Response) => {
     documentacao: demandas.filter((d) => d.tipo === "Documentação").length,
   };
 
-  const criticasEmAberto = demandas.filter(
-    (d) => d.prioridade === "Crítica" && estaEmAberto(d.status)
-  );
+  const ordemPrioridade: Record<string, number> = { "Crítica": 0, "Alta": 1, "Média": 2, "Baixa": 3 };
 
-  const proximasDoPrazo = demandas.filter(
-    (d) => estaEmAberto(d.status) && estaProximaDoPrazo(d.prazoFinalizacao)
-  );
+  const criticasEmAberto = demandas
+    .filter((d) => d.prioridade === "Crítica" && estaEmAberto(d.status))
+    .sort((a, b) => {
+      if (ordenacao === "prazo") {
+        return (a.prazoFinalizacao ?? "9999-99-99").localeCompare(b.prazoFinalizacao ?? "9999-99-99");
+      }
+      return (ordemPrioridade[a.prioridade] ?? 99) - (ordemPrioridade[b.prioridade] ?? 99);
+    })
+    .slice(0, limite)
+    .map((d) => ({ ...d, responsavelNome: nomeResponsavel(d.responsavelId) }));
+
+  const proximasDoPrazo = demandas
+    .filter((d) => estaEmAberto(d.status) && estaProximaDoPrazo(d.prazoFinalizacao))
+    .sort((a, b) => (a.prazoFinalizacao ?? "9999-99-99").localeCompare(b.prazoFinalizacao ?? "9999-99-99"))
+    .slice(0, limite)
+    .map((d) => ({ ...d, responsavelNome: nomeResponsavel(d.responsavelId) }));
 
   return res.status(200).json({
     total,

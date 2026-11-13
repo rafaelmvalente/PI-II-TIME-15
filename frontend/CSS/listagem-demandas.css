@@ -143,3 +143,11 @@
   padding: 20px 0 5px;
   font-size: 14px;
 }
+
+.linha-clicavel {
+  cursor: pointer;
+}
+
+.linha-clicavel:hover {
+  background-color: #f3f4f6;
+}

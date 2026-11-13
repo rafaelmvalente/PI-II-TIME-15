@@ -323,3 +323,13 @@ button.perigo:hover {
     width: 100%;
   }
 }
+
+.mensagem-api {
+  margin: 10px 0 0;
+  font-size: 14px;
+  min-height: 0;
+}
+
+.mensagem-api.mensagem-erro {
+  color: #dc2626;
+}

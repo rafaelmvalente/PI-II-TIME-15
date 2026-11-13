@@ -1,0 +1,84 @@
+/* Autor: Mateus - RA: 25001369 */
+/* Data: 09/11/2026 */
+/* Descrição: Estilos do menu de navegação entre telas */
+
+.menu-navegacao {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #4f46e5, #6d28d9);
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+.menu-marca {
+  font-size: 14px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.menu-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.menu-link {
+  color: #e0e7ff;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+.menu-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.menu-link-ativo {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-weight: bold;
+}
+
+.menu-usuario {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-nome-usuario {
+  font-size: 13px;
+  color: #e0e7ff;
+}
+
+.menu-sair {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #4f46e5;
+  background-color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.menu-sair:hover {
+  background-color: #e0e7ff;
+}
+
+@media (max-width: 700px) {
+  .menu-navegacao {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .menu-usuario {
+    justify-content: space-between;
+  }
+}
