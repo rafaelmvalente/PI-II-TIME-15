@@ -11,8 +11,8 @@ import { projetosVisiveis } from "../auth/permissoes.js";
 
 const router = Router();
 
-router.get("/projetos", autenticar, (req: Request, res: Response) => {
-  const projetos = projetosVisiveis(req.usuario!);
+router.get("/projetos", autenticar, async (req: Request, res: Response) => {
+  const projetos = await projetosVisiveis(req.usuario!);
   return res.status(200).json(projetos.map((p) => ({ id: p.id, nome: p.nome })));
 });
 

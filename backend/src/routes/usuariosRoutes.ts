@@ -7,18 +7,19 @@
 
 import { Router } from "express";
 import type { Request, Response } from "express";
-import { usuarios } from "../data/dados.js";
+import { listarUsuarios } from "../db/consultas.js";
 import { autenticar } from "../auth/autenticar.js";
 import { projetosVisiveis } from "../auth/permissoes.js";
 
 const router = Router();
 
-router.get("/usuarios", autenticar, (req: Request, res: Response) => {
+router.get("/usuarios", autenticar, async (req: Request, res: Response) => {
   const usuarioLogado = req.usuario!;
+  const usuarios = await listarUsuarios();
 
   let visiveis = usuarios;
   if (usuarioLogado.perfil !== "Administrador") {
-    const projetos = projetosVisiveis(usuarioLogado);
+    const projetos = await projetosVisiveis(usuarioLogado);
     const idsDoEscopo = new Set<number>([usuarioLogado.id]);
     for (const projeto of projetos) {
       projeto.liderIds.forEach((id) => idsDoEscopo.add(id));

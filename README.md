@@ -41,6 +41,7 @@ Prof. José Guilherme Picolo, Profa. Dra. Renata Arantes, Prof. Dr. Luã Muriana
 ### Pré-requisitos
 
 - [Node.js](https://nodejs.org/) (versão LTS vigente)
+- [MySQL 8](https://dev.mysql.com/downloads/installer/)
 - Git
 - Navegador web atualizado
 
@@ -51,7 +52,34 @@ git clone https://github.com/rafaelmvalente/PI-II-TIME-15.git
 cd PI-II-TIME-15
 ```
 
-### 2. Rodar o backend
+### 2. Configurar o banco de dados
+
+1. Instale o MySQL 8 e defina uma senha para o usuário `root`.
+2. Na raiz do projeto, carregue os scripts (sempre com `utf8mb4`, para não quebrar os acentos):
+
+   ```bash
+   mysql -u root -p --default-character-set=utf8mb4 -e "source database/01_schema.sql"
+   mysql -u root -p --default-character-set=utf8mb4 -e "source database/02_dados_exemplo.sql"
+   ```
+
+3. Crie o usuário da aplicação. Entre no MySQL com `mysql -u root -p` e, quando o prompt virar `mysql>`, rode (trocando a senha):
+
+   ```sql
+   CREATE USER 'pi2_app'@'localhost' IDENTIFIED BY 'sua_senha';
+   GRANT SELECT, INSERT, UPDATE ON pi2_demandas.* TO 'pi2_app'@'localhost';
+   FLUSH PRIVILEGES;
+   ```
+
+4. Dentro de `backend`, copie o modelo e ajuste a senha (`DB_PASSWORD`):
+
+   ```bash
+   cd backend
+   copy .env.example .env
+   ```
+
+O arquivo `.env` não vai para o GitHub.
+
+### 3. Rodar o backend
 
 ```bash
 cd backend
@@ -67,7 +95,7 @@ Servidor rodando em http://localhost:3000
 
 Para testar, acesse `http://localhost:3000` no navegador. Deixe o terminal aberto: se ele for fechado, o servidor para.
 
-### 3. Abrir o frontend
+### 4. Abrir o frontend
 
 Por enquanto, o frontend são páginas estáticas. Com o repositório clonado, abra os arquivos da pasta `frontend/HTML/` diretamente no navegador:
 

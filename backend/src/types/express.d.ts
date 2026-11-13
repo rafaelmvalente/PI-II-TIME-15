@@ -3,7 +3,7 @@
 // Descrição: Informa ao TypeScript que o middleware "autenticar"
 // adiciona o campo "usuario" na requisição (req).
 
-import type { Usuario } from "../data/dados.js";
+import type { Usuario } from "../types/modelos.js";
 
 declare global {
   namespace Express {
