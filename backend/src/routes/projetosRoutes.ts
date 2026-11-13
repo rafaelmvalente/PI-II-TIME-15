@@ -1,10 +1,8 @@
 // Autor: Mateus - RA: 25001369
 // Data: 09/11/2026
 // Descrição: Rota GET para listar os projetos (usada para preencher
-// selects de projeto no frontend)
-// Alterado por: Mateus - RA: 25001369 (09/11/2026)
-// - Lista passa a respeitar o perfil: Administrador vê todos os projetos,
-//   Líder vê os que lidera e Membro vê os que está vinculado
+// selects de projeto no frontend). Administrador vê todos os projetos,
+// Líder vê os que lidera e Membro vê os que está vinculado.
 
 import { Router } from "express";
 import type { Request, Response } from "express";

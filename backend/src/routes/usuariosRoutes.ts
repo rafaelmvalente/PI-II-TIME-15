@@ -2,10 +2,8 @@
 // Data: 09/11/2026
 // Descrição: Rota GET para listar os usuários (usada para preencher o
 // select de responsável no frontend). Nunca devolve a senha.
-// Alterado por: Mateus - RA: 25001369 (09/11/2026)
-// - Lista passa a respeitar o perfil: Administrador vê todos os usuários;
-//   Líder e Membro só veem usuários que dividem projeto com eles (além de
-//   si mesmos), evitando vazar a equipe de projetos de outros grupos
+// Administrador vê todos os usuários; Líder e Membro só veem usuários que
+// dividem projeto com eles (além de si mesmos).
 
 import { Router } from "express";
 import type { Request, Response } from "express";
