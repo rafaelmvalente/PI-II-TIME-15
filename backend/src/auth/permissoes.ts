@@ -36,6 +36,19 @@ const PERMISSOES: Record<Perfil, Acao[]> = {
   "Membro da Equipe": ["alterarStatus", "comentar"],
 };
 
+// Ciclo de vida da demanda: de cada status, para quais status é permitido
+// ir. Vale para todos os perfis — ninguém pula etapa (ex.: Em andamento
+// não vai direto para Concluída) nem volta de Em andamento para Aberta.
+// Cancelada e Concluída são estados finais (exceto o cancelamento, que tem
+// regra própria abaixo).
+const TRANSICOES_PERMITIDAS: Record<Status, Status[]> = {
+  "Aberta": ["Em andamento", "Cancelada"],
+  "Em andamento": ["Em revisão", "Cancelada"],
+  "Em revisão": ["Concluída", "Em andamento", "Cancelada"],
+  "Concluída": [],
+  "Cancelada": [],
+};
+
 // O Membro da Equipe só pode fazer estas duas transições
 const TRANSICOES_DO_MEMBRO: [Status, Status][] = [
   ["Aberta", "Em andamento"],
@@ -45,6 +58,26 @@ const TRANSICOES_DO_MEMBRO: [Status, Status][] = [
 export function lideraProjeto(usuario: Usuario, projetoId: number): boolean {
   // projetosLiderados é carregado do banco uma vez, na autenticação
   return usuario.projetosLiderados.includes(projetoId);
+}
+
+// Vínculo de um Membro da Equipe ao projeto (não confundir com ser
+// responsável por uma demanda específica dentro dele).
+export function membroDoProjeto(usuario: Usuario, projetoId: number): boolean {
+  const projeto = projetos.find((p) => p.id === projetoId);
+  return projeto?.membroIds.includes(usuario.id) ?? false;
+}
+
+// Projetos que o usuário pode enxergar, de acordo com o perfil
+// (usado nas rotas GET /projetos e GET /usuarios).
+export function projetosVisiveis(usuario: Usuario) {
+  switch (usuario.perfil) {
+    case "Administrador":
+      return projetos;
+    case "Líder de Projeto":
+      return projetos.filter((p) => p.liderIds.includes(usuario.id));
+    case "Membro da Equipe":
+      return projetos.filter((p) => p.membroIds.includes(usuario.id));
+  }
 }
 
 // 2. ONDE o usuário pode agir
@@ -58,7 +91,8 @@ function estaNoEscopo(
     case "Líder de Projeto":
       return lideraProjeto(usuario, alvo.projetoId);
     case "Membro da Equipe":
-      return alvo.responsavelId === usuario.id;
+      // Vê as demandas do(s) projeto(s) ao qual pertence, não só as suas.
+      return membroDoProjeto(usuario, alvo.projetoId);
   }
 }
 
@@ -87,7 +121,23 @@ export function podeExecutar(
   // Comentar é permitido em qualquer demanda que o usuário consegue ver
   if (acao === "comentar") return podeVisualizar(usuario, alvo);
 
+  // Ver o projeto inteiro não é a mesma coisa que agir sobre qualquer
+  // demanda dele: o Membro enxerga todas as demandas do seu projeto
+  // (estaNoEscopo), mas só altera status de demandas atribuídas a ele.
+  // Membro não tem as demais ações (criarDemanda, editarDemanda etc.),
+  // então isso só afeta alterarStatus na prática.
+  if (usuario.perfil === "Membro da Equipe") {
+    return alvo.responsavelId === usuario.id;
+  }
+
   return estaNoEscopo(usuario, alvo);
+}
+
+// Ninguém pula etapa do ciclo de vida, nem volta de Em andamento para
+// Aberta, independentemente do perfil. Usada pela rota para distinguir
+// "transição inválida" (409) de "sem permissão" (403).
+export function transicaoValida(statusAtual: Status, novoStatus: Status): boolean {
+  return TRANSICOES_PERMITIDAS[statusAtual].includes(novoStatus);
 }
 
 export function podeAlterarStatus(
@@ -96,6 +146,7 @@ export function podeAlterarStatus(
   novoStatus: Status
 ): boolean {
   if (!podeExecutar(usuario, "alterarStatus", demanda)) return false;
+  if (!transicaoValida(demanda.status, novoStatus)) return false;
 
   if (usuario.perfil === "Membro da Equipe") {
     return TRANSICOES_DO_MEMBRO.some(
@@ -103,5 +154,5 @@ export function podeAlterarStatus(
     );
   }
 
-  return true; // Administrador e Líder do projeto fazem todas as transições
+  return true; // Administrador e Líder do projeto fazem as demais transições previstas
 }
