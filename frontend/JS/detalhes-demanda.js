@@ -29,10 +29,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     return div.innerHTML;
   }
 
+  // A data vem como texto "AAAA-MM-DD". Ela é montada direto do texto porque
+  // o new Date lê esse formato como meia-noite em UTC, o que no fuso do
+  // Brasil mostraria o dia anterior.
   function formatarData(iso) {
     if (!iso) return '—';
-    const data = new Date(iso);
-    return data.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const [ano, mes, dia] = String(iso).slice(0, 10).split('-');
+    return `${dia}/${mes}/${ano}`;
   }
 
   function formatarDataHora(iso) {
