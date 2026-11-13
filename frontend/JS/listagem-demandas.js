@@ -3,9 +3,7 @@
 // Descrição: Comportamento e validações em JavaScript da tela de listagem de
 //            demandas — busca textual, filtros (status, prioridade, tipo,
 //            responsável, projeto), ordenação dos resultados e validação do
-//            campo de busca.
-// Alterado por: Mateus - RA: 25001369 (09/11/2026)
-// - Dados passam a vir da API (GET /api/demandas) em vez de um array mock
+//            campo de busca. Os dados vêm da API (GET /api/demandas).
 
 document.addEventListener('DOMContentLoaded', async () => {
   exigirLogin();
