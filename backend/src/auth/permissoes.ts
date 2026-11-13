@@ -11,6 +11,7 @@
 //      - Líder de Projeto: nas demandas dos projetos que lidera
 //      - Membro da Equipe: nas demandas atribuídas a ele
 
+import { projetos } from "../data/dados.js";
 import type { Usuario, Demanda, Perfil } from "../types/modelos.js";
 
 type Status = Demanda["status"];
