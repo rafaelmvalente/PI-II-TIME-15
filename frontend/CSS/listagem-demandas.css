@@ -2,6 +2,19 @@
 /* Data: 11/09/2026 */
 /* Descrição: Estilos utilizados na página de listagem de demandas do sistema */
 
+body {
+  margin: 0;
+  font-family: 'Inter', Arial, sans-serif;
+  background-color: #f4f5f7;
+  color: #1e293b;
+}
+
+/* Campos não herdam a fonte da página por padrão */
+input,
+select {
+  font-family: inherit;
+}
+
 .page-demandas {
   max-width: 1100px;
   margin: 0 auto;
@@ -13,14 +26,10 @@
   margin-bottom: 25px;
 }
 
-.demandas-header h1 {
-  font-size: 18px;
-  color: #1e293b;
-  margin: 0 0 5px;
-}
-
 .demandas-header h2 {
-  font-size: 22px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
 }
 
@@ -28,39 +37,42 @@
 .barra-filtros {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 10px;
   margin-bottom: 20px;
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
   padding: 15px;
 }
 
 .campo-busca {
-  flex: 2;
-  min-width: 200px;
-  padding: 8px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 10px;
   font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  color: #1e293b;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
 }
 
 .filtro {
   flex: 1;
-  min-width: 130px;
-  padding: 8px 10px;
+  min-width: 115px;
+  padding: 9px 10px;
   font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  color: #1e293b;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
   background-color: #fff;
 }
 
 /* Tabela de demandas */
 .tabela-demandas {
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 15px;
   overflow-x: auto;
 }
 
@@ -73,14 +85,20 @@
 .tabela-demandas th,
 .tabela-demandas td {
   text-align: left;
-  padding: 10px 8px;
-  border-bottom: 1px solid #eee;
-  white-space: nowrap;
+  padding: 12px 8px;
+  border-bottom: 1px solid #eef0f3;
 }
 
 .tabela-demandas th {
-  color: #555;
-  font-weight: bold;
+  font-size: 12px;
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Responsável não definido aparece em cinza */
+.sem-responsavel {
+  color: #64748b;
 }
 
 /* Tags de prioridade */
@@ -88,9 +106,10 @@
   display: inline-block;
   padding: 3px 8px;
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
+  font-size: 11px;
+  font-weight: 700;
   color: #fff;
+  white-space: nowrap;
 }
 
 .tag-critica {
@@ -98,7 +117,8 @@
 }
 
 .tag-alta {
-  background-color: #f59e0b;
+  background-color: #fbbf24;
+  color: #1f2937;
 }
 
 .tag-media {
@@ -134,7 +154,11 @@
   color: #dc2626;
   font-size: 12px;
   margin-top: 4px;
-  min-height: 14px;
+}
+
+/* Sem mensagem de erro, não reserva espaço (mantém os filtros alinhados) */
+.erro-validacao:empty {
+  display: none;
 }
 
 .mensagem-vazia {

@@ -4,9 +4,14 @@
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   background-color: #f4f5f7;
   color: #1e293b;
+}
+
+/* Botões não herdam a fonte da página por padrão */
+button {
+  font-family: inherit;
 }
 
 .page-cadastro {
@@ -20,23 +25,19 @@ body {
   margin-bottom: 25px;
 }
 
-.cadastro-header h1 {
-  font-size: 18px;
-  color: #1e293b;
-  margin: 0 0 5px;
-}
-
 .cadastro-header h2 {
-  font-size: 22px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
 }
 
 /* Cartão que contém o formulário */
 .form-demanda {
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 25px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 28px;
 }
 
 .campo {
@@ -54,8 +55,8 @@ body {
   display: block;
   margin-bottom: 6px;
   font-size: 13px;
-  font-weight: bold;
-  color: #374151;
+  font-weight: 600;
+  color: #334155;
 }
 
 .campo input,
@@ -67,7 +68,7 @@ body {
   font-size: 14px;
   font-family: inherit;
   color: #1f2937;
-  background-color: #fafafa;
+  background-color: #fff;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   outline: none;
@@ -115,7 +116,7 @@ button.primario {
   font-size: 14px;
   font-weight: bold;
   color: #fff;
-  background: linear-gradient(135deg, #4f46e5, #6d28d9);
+  background-color: #4338ca;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -123,7 +124,7 @@ button.primario {
 }
 
 button.primario:hover {
-  background: linear-gradient(135deg, #4338ca, #5b21b6);
+  background-color: #3730a3;
   transform: translateY(-1px);
 }
 

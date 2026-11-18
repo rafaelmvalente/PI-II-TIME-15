@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <td><span class="tag tag-${slugPorPrioridade[d.prioridade]}">${d.prioridade}</span></td>
         <td>${d.status}</td>
         <td>${escapar(d.projeto?.nome ?? '')}</td>
-        <td>${escapar(d.responsavel?.nome ?? 'Sem responsável')}</td>
+        <td>${d.responsavel ? escapar(d.responsavel.nome) : '<span class="sem-responsavel">Sem responsável</span>'}</td>
         <td>${formatarData(d.criadaEm)}</td>
         <td>${d.prazoFinalizacao ? formatarData(d.prazoFinalizacao) : '—'}</td>
       `;

@@ -2,6 +2,20 @@
 /* Data: 10/09/2026 */
 /* Descrição: Estilos utilizados na página de dashboard do sistema */
 
+body {
+  margin: 0;
+  font-family: 'Inter', Arial, sans-serif;
+  background-color: #f4f5f7;
+  color: #1e293b;
+}
+
+/* Campos e botões não herdam a fonte da página por padrão */
+button,
+input,
+select {
+  font-family: inherit;
+}
+
 .page-dashboard {
   max-width: 960px;
   margin: 0 auto;
@@ -10,17 +24,13 @@
 
 .dashboard-header {
   text-align: center;
-  margin-bottom: 30px;
-}
-
-.dashboard-header h1 {
-  font-size: 18px;
-  color: #1e293b;
-  margin: 0 0 5px;
+  margin-bottom: 25px;
 }
 
 .dashboard-header h2 {
-  font-size: 22px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
 }
 
@@ -29,30 +39,30 @@
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
 }
 
 .card-contador {
   flex: 1;
   min-width: 120px;
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px 15px;
   text-align: center;
 }
 
 .card-contador .numero {
   display: block;
-  font-size: 24px;
-  font-weight: bold;
-  color: #2563eb;
+  font-size: 26px;
+  font-weight: 700;
+  color: #4338ca;
 }
 
 .card-contador .rotulo {
   display: block;
   font-size: 13px;
-  color: #555;
+  color: #475569;
   margin-top: 5px;
 }
 
@@ -61,20 +71,22 @@
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
 }
 
 .grupo {
   flex: 1;
   min-width: 250px;
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px;
 }
 
 .grupo h3 {
   font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
   margin: 0 0 10px;
 }
 
@@ -87,45 +99,48 @@
 .lista-contagem li {
   display: flex;
   justify-content: space-between;
-  padding: 6px 0;
+  padding: 8px 0;
   font-size: 14px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #eef0f3;
 }
 
-.lista-contagem li:last-child {
-  border-bottom: none;
+.lista-contagem li span:last-child {
+  font-weight: 600;
 }
 
 /* Listas de demandas (críticas e próximas do prazo) */
 .lista-demandas {
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px;
   margin-bottom: 20px;
 }
 
 .lista-demandas h3 {
   font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
   margin: 0 0 10px;
 }
 
 .lista-demandas table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .lista-demandas th,
 .lista-demandas td {
   text-align: left;
-  padding: 8px;
-  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+  border-bottom: 1px solid #eef0f3;
 }
 
 .lista-demandas th {
-  color: #555;
-  font-weight: bold;
+  font-size: 12px;
+  color: #475569;
+  font-weight: 600;
 }
 
 @media (max-width: 600px) {
@@ -138,43 +153,81 @@
 /* Filtro do dashboard */
 .filtro-dashboard {
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px;
   margin-bottom: 20px;
 }
 
+/* Grade: os campos ocupam a primeira linha e o botão Filtrar cai na de baixo */
 .filtro-dashboard form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  align-items: start;
 }
 
 .campo-filtro {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
 }
 
 .campo-filtro select,
 .campo-filtro input {
-  padding: 8px;
+  padding: 9px 10px;
   font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  color: #1e293b;
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
 }
 
+/* "Ordenar críticas por" em cima e as duas opções lado a lado embaixo */
 .campo-filtro-radio {
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 6px 12px;
+}
+
+.campo-filtro-radio label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 14px;
+  white-space: nowrap;
+  font-weight: 400;
+  cursor: pointer;
 }
 
 .rotulo-radio {
-  font-weight: bold;
-  margin-right: 5px;
+  flex-basis: 100%;
+}
+
+.campo-filtro-radio .erro-campo {
+  flex-basis: 100%;
+}
+
+.filtro-dashboard button.primary {
+  justify-self: start;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background-color: #4338ca;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.filtro-dashboard button.primary:hover {
+  background-color: #3730a3;
 }
 
 .erro-campo {
