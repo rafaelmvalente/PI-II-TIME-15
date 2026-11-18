@@ -4,9 +4,14 @@
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   background-color: #f4f5f7;
   color: #1e293b;
+}
+
+/* Botões não herdam a fonte da página por padrão */
+button {
+  font-family: inherit;
 }
 
 .page-detalhes {
@@ -20,14 +25,10 @@ body {
   margin-bottom: 25px;
 }
 
-.detalhes-header h1 {
-  font-size: 18px;
-  color: #1e293b;
-  margin: 0 0 5px;
-}
-
 .detalhes-header h2 {
-  font-size: 22px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
   margin: 0;
 }
 
@@ -35,8 +36,8 @@ body {
 .cartao-demanda,
 .cartao-secao {
   background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
   padding: 20px;
   margin-bottom: 20px;
   box-sizing: border-box;
@@ -44,6 +45,8 @@ body {
 
 .cartao-secao h3 {
   font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
   margin: 0 0 15px;
 }
 
@@ -93,7 +96,8 @@ body {
 }
 
 .tag-alta {
-  background-color: #f59e0b;
+  background-color: #fbbf24;
+  color: #1f2937;
 }
 
 .tag-media {
@@ -172,7 +176,7 @@ button.primario {
   font-size: 13px;
   font-weight: bold;
   color: #fff;
-  background: linear-gradient(135deg, #4f46e5, #6d28d9);
+  background-color: #4338ca;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -180,7 +184,7 @@ button.primario {
 }
 
 button.primario:hover {
-  background: linear-gradient(135deg, #4338ca, #5b21b6);
+  background-color: #3730a3;
 }
 
 button.secundario {
