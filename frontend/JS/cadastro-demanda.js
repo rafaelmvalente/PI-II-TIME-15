@@ -1,212 +1,225 @@
 // Autor: Vinicius Santuci Virgolino - RA: 25000294
 // Data: 21/09/2026
-// Descrição: Validações em JavaScript do formulário de cadastro/edição de demanda
+// Descrição: Formulário de cadastro e edição de demanda: carrega projetos e
+// usuários da API, preenche o formulário na edição, valida os campos e salva
+// a demanda na API (POST para criar, PUT para editar)
 
+// Executa quando o HTML da página termina de carregar
 document.addEventListener('DOMContentLoaded', async () => {
-  exigirLogin();
+  exigirLogin(); // sem login, volta para a tela de login
 
-  const form = document.getElementById('formDemanda');
-  const selectProjeto = document.getElementById('projeto');
-  const selectResponsavel = document.getElementById('responsavel');
+  const form = document.getElementById('formDemanda'); // formulário da demanda
+  const selectProjeto = document.getElementById('projeto'); // select de projeto
+  const selectResponsavel = document.getElementById('responsavel'); // select de responsável
+  // Id da URL (?id=); null = nova demanda
   const idDemandaEditando = new URLSearchParams(window.location.search).get('id');
 
-  // Mensagem de erro/sucesso vinda da API, mostrada acima dos botões.
-  const mensagemApi = document.createElement('p');
-  mensagemApi.className = 'mensagem-api';
+  const mensagemApi = document.createElement('p'); // parágrafo para mensagens da API
+  mensagemApi.className = 'mensagem-api'; // aplica o estilo da mensagem
+  // Coloca a mensagem acima dos botões
   form.querySelector('.acoes-formulario').insertAdjacentElement('beforebegin', mensagemApi);
 
-  // Carrega projetos e usuários reais pra preencher os selects (antes eram
-  // opções fixas no HTML).
+  // Carrega projetos e usuários da API e preenche os selects
   async function carregarListas() {
-    const [projetos, usuarios] = await Promise.all([
-      apiFetch('/projetos'),
-      apiFetch('/usuarios'),
+    const [projetos, usuarios] = await Promise.all([ // faz as duas buscas ao mesmo tempo
+      apiFetch('/projetos'), // projetos que o usuário pode ver
+      apiFetch('/usuarios'), // usuários que podem ser responsáveis
     ]);
 
-    projetos.forEach((projeto) => {
-      const opcao = document.createElement('option');
-      opcao.value = projeto.id;
-      opcao.textContent = projeto.nome;
-      selectProjeto.appendChild(opcao);
+    projetos.forEach((projeto) => { // para cada projeto...
+      const opcao = document.createElement('option'); // cria uma opção
+      opcao.value = projeto.id; // valor enviado: id do projeto
+      opcao.textContent = projeto.nome; // texto exibido: nome do projeto
+      selectProjeto.appendChild(opcao); // adiciona no select de projeto
     });
 
-    usuarios.forEach((usuario) => {
-      const opcao = document.createElement('option');
-      opcao.value = usuario.id;
-      opcao.textContent = usuario.nome;
-      selectResponsavel.appendChild(opcao);
+    usuarios.forEach((usuario) => { // para cada usuário...
+      const opcao = document.createElement('option'); // cria uma opção
+      opcao.value = usuario.id; // valor enviado: id do usuário
+      opcao.textContent = usuario.nome; // texto exibido: nome do usuário
+      selectResponsavel.appendChild(opcao); // adiciona no select de responsável
     });
   }
 
-  // Se a tela foi aberta para edição (cadastro-demanda.html?id=3), busca os
-  // dados da demanda e preenche o formulário.
+  // No modo de edição, busca a demanda e preenche o formulário
   async function carregarDemandaParaEdicao() {
-    if (!idDemandaEditando) return;
+    if (!idDemandaEditando) return; // nova demanda: não há o que carregar
 
-    const demanda = await apiFetch(`/demandas/${idDemandaEditando}`);
-    document.getElementById('titulo').value = demanda.titulo;
-    document.getElementById('descricao').value = demanda.descricao;
-    selectProjeto.value = demanda.projetoId;
+    const demanda = await apiFetch(`/demandas/${idDemandaEditando}`); // busca a demanda na API
+    document.getElementById('titulo').value = demanda.titulo; // preenche o título
+    document.getElementById('descricao').value = demanda.descricao; // preenche a descrição
+    selectProjeto.value = demanda.projetoId; // seleciona o projeto
+    // Seleciona o responsável (ou "sem responsável")
     selectResponsavel.value = demanda.responsavelId ?? '';
+    // Preenche o prazo (ou vazio)
     document.getElementById('prazo').value = demanda.prazoFinalizacao ?? '';
 
-    const slugPorValorPt = {
+    const slugPorValorPt = { // converte o texto da API para o valor usado nos selects
+      // Tipos
       tipo: { Tarefa: 'tarefa', Defeito: 'defeito', Melhoria: 'melhoria', 'Documentação': 'documentacao' },
+      // Prioridades
       prioridade: { 'Crítica': 'critica', Alta: 'alta', 'Média': 'media', Baixa: 'baixa' },
     };
-    document.getElementById('tipo').value = slugPorValorPt.tipo[demanda.tipo];
+    document.getElementById('tipo').value = slugPorValorPt.tipo[demanda.tipo]; // seleciona o tipo
+    // Seleciona a prioridade
     document.getElementById('prioridade').value = slugPorValorPt.prioridade[demanda.prioridade];
 
+    // Troca o título da tela
     document.querySelector('.cadastro-header h2').textContent = 'Editar Demanda';
+    // Troca o texto do botão
     document.getElementById('btnSalvar').textContent = 'Salvar alterações';
   }
 
   try {
-    await carregarListas();
-    await carregarDemandaParaEdicao();
+    await carregarListas(); // primeiro as opções dos selects...
+    await carregarDemandaParaEdicao(); // ...depois a demanda, para conseguir marcar as opções
   } catch (erro) {
-    mensagemApi.textContent = erro.message;
-    mensagemApi.classList.add('mensagem-erro');
+    mensagemApi.textContent = erro.message; // mostra o erro da API na tela
+    mensagemApi.classList.add('mensagem-erro'); // deixa a mensagem em vermelho
   }
 
-  // Cada campo descreve sua própria regra de validação: qual evento dispara
-  // a checagem e uma função que recebe o valor e retorna a mensagem de erro
-  // (ou null se estiver tudo certo). Isso evita repetir a mesma estrutura de
-  // validação/exibição de erro para cada campo separadamente.
+  // Regras de validação de cada campo: elemento, evento que dispara e função que valida
   const regras = {
-    titulo: {
-      elemento: document.getElementById('titulo'),
-      evento: 'blur',
+    titulo: { // regras do título
+      elemento: document.getElementById('titulo'), // campo de título
+      evento: 'blur', // valida ao sair do campo
       validar: (valor) => {
-        if (!valor.trim()) return 'O título é obrigatório.';
+        if (!valor.trim()) return 'O título é obrigatório.'; // vazio
+        // Curto demais
         if (valor.trim().length < 5) return 'O título deve ter no mínimo 5 caracteres.';
+        // Longo demais
         if (valor.trim().length > 120) return 'O título deve ter no máximo 120 caracteres.';
-        return null;
+        return null; // válido
       },
     },
-    descricao: {
-      elemento: document.getElementById('descricao'),
-      evento: 'blur',
+    descricao: { // regras da descrição
+      elemento: document.getElementById('descricao'), // campo de descrição
+      evento: 'blur', // valida ao sair do campo
       validar: (valor) => {
-        if (!valor.trim()) return 'A descrição é obrigatória.';
+        if (!valor.trim()) return 'A descrição é obrigatória.'; // vazia
+        // Curta demais
         if (valor.trim().length < 10) return 'A descrição deve ter no mínimo 10 caracteres.';
-        return null;
+        return null; // válida
       },
     },
-    tipo: {
-      elemento: document.getElementById('tipo'),
-      evento: 'change',
-      validar: (valor) => (valor === '' ? 'Selecione um tipo de demanda.' : null),
+    tipo: { // regras do tipo
+      elemento: document.getElementById('tipo'), // select de tipo
+      evento: 'change', // valida ao trocar a opção
+      validar: (valor) => (valor === '' ? 'Selecione um tipo de demanda.' : null), // obrigatório
     },
-    prioridade: {
-      elemento: document.getElementById('prioridade'),
-      evento: 'change',
-      validar: (valor) => (valor === '' ? 'Selecione uma prioridade.' : null),
+    prioridade: { // regras da prioridade
+      elemento: document.getElementById('prioridade'), // select de prioridade
+      evento: 'change', // valida ao trocar a opção
+      validar: (valor) => (valor === '' ? 'Selecione uma prioridade.' : null), // obrigatória
     },
-    projeto: {
-      elemento: document.getElementById('projeto'),
-      evento: 'change',
-      validar: (valor) => (valor === '' ? 'Selecione um projeto.' : null),
+    projeto: { // regras do projeto
+      elemento: document.getElementById('projeto'), // select de projeto
+      evento: 'change', // valida ao trocar a opção
+      validar: (valor) => (valor === '' ? 'Selecione um projeto.' : null), // obrigatório
     },
-    // O prazo é o único campo opcional (pode ser definido depois, conforme
-    // o escopo do sistema). A validação de feriado por API fica para depois.
-    prazo: {
-      elemento: document.getElementById('prazo'),
-      evento: 'change',
+    prazo: { // regras do prazo (opcional; feriado é checado no backend)
+      elemento: document.getElementById('prazo'), // campo de data do prazo
+      evento: 'change', // valida ao trocar a data
       validar: (valor) => {
-        if (!valor) return null;
+        if (!valor) return null; // sem prazo: válido
 
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
+        const hoje = new Date(); // data de hoje
+        hoje.setHours(0, 0, 0, 0); // zera o horário para comparar só a data
 
-        // 'T00:00:00' evita o bug comum do <input type="date"> "voltar um dia"
-        // por causa de conversão de fuso horário.
+        // Prazo antes de hoje ('T00:00:00' evita erro de fuso)
         if (new Date(valor + 'T00:00:00') < hoje) {
-          return 'O prazo não pode ser uma data no passado.';
+          return 'O prazo não pode ser uma data no passado.'; // data no passado
         }
-        return null;
+        return null; // válido
       },
     },
   };
 
-  // Cria a mensagem de erro logo abaixo do campo e marca ele como inválido.
-  // Sempre limpa um erro anterior antes, pra não acumular mensagens.
+  // Mostra a mensagem de erro abaixo do campo e marca o campo como inválido
   function mostrarErro(elemento, mensagem) {
-    limparErro(elemento);
-    const erro = document.createElement('span');
-    erro.className = 'erro-validacao';
-    erro.textContent = mensagem;
-    elemento.insertAdjacentElement('afterend', erro);
-    elemento.classList.add('campo-invalido');
+    limparErro(elemento); // remove um erro anterior, para não acumular
+    const erro = document.createElement('span'); // cria o elemento da mensagem
+    erro.className = 'erro-validacao'; // aplica o estilo de erro
+    erro.textContent = mensagem; // coloca o texto do erro
+    elemento.insertAdjacentElement('afterend', erro); // insere logo depois do campo
+    elemento.classList.add('campo-invalido'); // destaca o campo em vermelho
   }
 
+  // Remove a mensagem de erro e o destaque do campo
   function limparErro(elemento) {
-    elemento.classList.remove('campo-invalido');
-    const proximo = elemento.nextElementSibling;
+    elemento.classList.remove('campo-invalido'); // tira o destaque vermelho
+    const proximo = elemento.nextElementSibling; // elemento logo depois do campo
+    // Se for a mensagem de erro, remove
     if (proximo?.classList.contains('erro-validacao')) proximo.remove();
   }
 
-  // Valida um único campo pelo nome (chave do objeto "regras") e atualiza a
-  // tela de acordo com o resultado. Retorna true/false pra uso no submit.
+  // Valida um campo pelo nome e devolve true se estiver válido
   function validarCampo(nome) {
-    const { elemento, validar } = regras[nome];
-    const mensagemErro = validar(elemento.value);
+    const { elemento, validar } = regras[nome]; // pega o campo e a função de validação
+    const mensagemErro = validar(elemento.value); // valida o valor atual
+    // Mostra ou limpa o erro
     mensagemErro ? mostrarErro(elemento, mensagemErro) : limparErro(elemento);
-    return !mensagemErro;
+    return !mensagemErro; // true se não houve erro
   }
 
-  // Roda a validação de todos os campos de uma vez — usado no envio do form.
+  // Valida todos os campos e devolve true se todos estiverem válidos
   function validarTudo() {
-    return Object.keys(regras)
-      .map(validarCampo)
-      .every(Boolean);
+    return Object.keys(regras) // nomes de todos os campos
+      .map(validarCampo) // valida cada um (mostrando os erros)
+      .every(Boolean); // true só se todos passaram
   }
 
-  // Liga cada campo ao seu evento configurado (blur ou change), validando
-  // em tempo real conforme o usuário interage com o formulário.
+  // Valida cada campo em tempo real, no evento definido nas regras
   Object.entries(regras).forEach(([nome, { elemento, evento }]) => {
+    // Liga o evento à validação do campo
     elemento.addEventListener(evento, () => validarCampo(nome));
   });
 
-  // Impede o envio do formulário enquanto houver campos inválidos.
+  // Ao enviar: valida e salva a demanda na API
   form.addEventListener('submit', async (evento) => {
-    evento.preventDefault();
-    mensagemApi.textContent = '';
-    mensagemApi.classList.remove('mensagem-erro');
+    evento.preventDefault(); // impede o envio padrão (recarregar a página)
+    mensagemApi.textContent = ''; // limpa a mensagem anterior
+    mensagemApi.classList.remove('mensagem-erro'); // tira o estilo de erro
 
-    if (!validarTudo()) {
+    if (!validarTudo()) { // algum campo inválido
+      // Avisa o usuário
       mensagemApi.textContent = 'Corrija os campos destacados antes de salvar a demanda.';
-      mensagemApi.classList.add('mensagem-erro');
-      return;
+      mensagemApi.classList.add('mensagem-erro'); // deixa a mensagem em vermelho
+      return; // não envia
     }
 
-    const corpo = {
-      titulo: regras.titulo.elemento.value,
-      descricao: regras.descricao.elemento.value,
-      tipo: regras.tipo.elemento.value,
-      prioridade: regras.prioridade.elemento.value,
-      projetoId: Number(regras.projeto.elemento.value),
+    const corpo = { // dados enviados para a API
+      titulo: regras.titulo.elemento.value, // título
+      descricao: regras.descricao.elemento.value, // descrição
+      tipo: regras.tipo.elemento.value, // tipo
+      prioridade: regras.prioridade.elemento.value, // prioridade
+      projetoId: Number(regras.projeto.elemento.value), // id do projeto (número)
+      // Id do responsável ou null
       responsavelId: selectResponsavel.value ? Number(selectResponsavel.value) : null,
-      prazoFinalizacao: regras.prazo.elemento.value || null,
+      prazoFinalizacao: regras.prazo.elemento.value || null, // prazo ou null
     };
 
     try {
-      if (idDemandaEditando) {
+      if (idDemandaEditando) { // modo de edição
+        // Atualiza a demanda
         await apiFetch(`/demandas/${idDemandaEditando}`, { method: 'PUT', body: JSON.stringify(corpo) });
-      } else {
+      } else { // modo de cadastro
+        // Cria a demanda
         await apiFetch('/demandas', { method: 'POST', body: JSON.stringify(corpo) });
       }
-      window.location.href = 'listagem-demandas.html';
+      window.location.href = 'listagem-demandas.html'; // deu certo: volta para a listagem
     } catch (erro) {
-      mensagemApi.textContent = erro.message;
-      mensagemApi.classList.add('mensagem-erro');
+      mensagemApi.textContent = erro.message; // mostra o erro da API (ex.: prazo em feriado)
+      mensagemApi.classList.add('mensagem-erro'); // deixa a mensagem em vermelho
     }
   });
 
-  // Limpa o formulário e remove todos os erros exibidos ao cancelar.
+  // Ao cancelar: limpa o formulário e os erros
   document.getElementById('btnCancelar').addEventListener('click', () => {
-    form.reset();
+    form.reset(); // volta os campos ao estado inicial
+    // Remove as mensagens de erro
     document.querySelectorAll('.erro-validacao').forEach(el => el.remove());
+    // Tira os destaques vermelhos
     document.querySelectorAll('.campo-invalido').forEach(el => el.classList.remove('campo-invalido'));
   });
-});
+});

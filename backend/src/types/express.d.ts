@@ -3,14 +3,14 @@
 // Descrição: Informa ao TypeScript que o middleware "autenticar"
 // adiciona o campo "usuario" na requisição (req).
 
-import type { Usuario } from "../types/modelos.js";
+import type { Usuario } from "../types/modelos.js"; // tipo do usuário do sistema
 
-declare global {
-  namespace Express {
-    interface Request {
-      usuario?: Usuario;
+declare global { // altera um tipo global já existente
+  namespace Express { // tipos do Express
+    interface Request { // acrescenta campos ao tipo da requisição
+      usuario?: Usuario; // usuário logado (só existe nas rotas que passam pelo "autenticar")
     }
   }
 }
 
-export {};
+export {}; // faz o arquivo ser tratado como módulo (exigido pelo "declare global")
