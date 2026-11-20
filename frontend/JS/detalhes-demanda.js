@@ -8,6 +8,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const idDemanda = new URLSearchParams(window.location.search).get('id');
   const mensagemApi = document.getElementById('mensagemApi');
+  const btnEditar = document.getElementById('btnEditar');
+  const btnAlterarStatus = document.getElementById('btnAlterarStatus');
+  const btnCancelar = document.getElementById('btnCancelar');
+  let statusPermitidos = []; // status para onde o usuário pode levar a demanda
+
+  // Valor que o backend aceita para cada status
+  const slugPorStatus = {
+    'Aberta': 'aberta',
+    'Em andamento': 'em_andamento',
+    'Em revisão': 'em_revisao',
+    'Concluída': 'concluida',
+    'Cancelada': 'cancelada',
+  };
+
+  // Mostra só os botões que o usuário logado pode usar nesta demanda.
+  // Sem permissões (ex.: erro ao carregar), todos ficam escondidos.
+  function atualizarBotoes(permissoes) {
+    statusPermitidos = permissoes?.statusPermitidos ?? [];
+    btnEditar.style.display = permissoes?.editar ? '' : 'none';
+    btnAlterarStatus.style.display = statusPermitidos.length > 0 ? '' : 'none';
+    btnCancelar.style.display = permissoes?.cancelar ? '' : 'none';
+  }
+  atualizarBotoes(null); // começa escondendo tudo até a demanda carregar
 
   const classePorStatus = {
     'Aberta': 'status-aberta',
@@ -47,6 +70,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   function mostrarErro(erro) {
     mensagemApi.textContent = erro.message;
     mensagemApi.classList.add('mensagem-erro');
+  }
+
+  // Apaga o erro da ação anterior antes de tentar uma nova
+  function limparErro() {
+    mensagemApi.textContent = '';
+    mensagemApi.classList.remove('mensagem-erro');
   }
 
   async function carregarDemanda() {
@@ -104,6 +133,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       listaComentarios.appendChild(li);
     });
 
+    atualizarBotoes(demanda.permissoes);
+
     return demanda;
   }
 
@@ -113,15 +144,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     mostrarErro(erro);
   }
 
-  document.getElementById('btnEditar').addEventListener('click', () => {
+  btnEditar.addEventListener('click', () => {
     window.location.href = `cadastro-demanda.html?id=${idDemanda}`;
   });
 
-  document.getElementById('btnAlterarStatus').addEventListener('click', async () => {
-    const opcoes = ['aberta', 'em_andamento', 'em_revisao', 'concluida', 'cancelada'];
+  btnAlterarStatus.addEventListener('click', async () => {
+    const opcoes = statusPermitidos.map((status) => slugPorStatus[status]); // só os permitidos
     const novoStatus = window.prompt(`Informe o novo status (${opcoes.join(', ')}):`);
     if (!novoStatus) return;
 
+    limparErro();
     try {
       await apiFetch(`/demandas/${idDemanda}/status`, {
         method: 'PATCH',
@@ -133,9 +165,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  document.getElementById('btnCancelar').addEventListener('click', async () => {
+  btnCancelar.addEventListener('click', async () => {
     if (!window.confirm('Tem certeza que deseja cancelar esta demanda?')) return;
 
+    limparErro();
     try {
       await apiFetch(`/demandas/${idDemanda}/cancelar`, { method: 'POST' });
       await carregarDemanda();
@@ -149,6 +182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const campoTexto = document.getElementById('textoComentario');
     if (!campoTexto.value.trim()) return;
 
+    limparErro();
     try {
       await apiFetch(`/demandas/${idDemanda}/comentarios`, {
         method: 'POST',

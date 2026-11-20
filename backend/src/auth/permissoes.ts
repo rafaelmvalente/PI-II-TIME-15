@@ -59,6 +59,13 @@ export function membroDoProjeto(usuario: Usuario, projetoId: number): boolean {
   return usuario.projetosVinculados.includes(projetoId);
 }
 
+// Diz se o usuário pode ser responsável por demandas do projeto: precisa estar
+// vinculado a ele (como líder ou membro); o Administrador pode em qualquer projeto
+export function podeSerResponsavel(usuario: Usuario, projetoId: number): boolean {
+  if (usuario.perfil === "Administrador") return true; // Administrador atende qualquer projeto
+  return lideraProjeto(usuario, projetoId) || membroDoProjeto(usuario, projetoId); // está no projeto?
+}
+
 // Devolve os projetos que o usuário pode ver, de acordo com o perfil
 export async function projetosVisiveis(usuario: Usuario): Promise<Projeto[]> {
   const projetos = await listarProjetos(); // busca todos os projetos no banco
@@ -118,6 +125,20 @@ export function podeExecutar(
   }
 
   return estaNoEscopo(usuario, alvo); // Administrador e Líder: depende do escopo
+}
+
+// Resume o que o usuário pode fazer na demanda, para a tela esconder os botões
+// que ele não pode usar (as rotas continuam conferindo tudo de novo)
+export function permissoesNaDemanda(usuario: Usuario, demanda: Demanda) {
+  // Status para onde ele pode levar a demanda agora (sem o cancelamento, que tem botão próprio)
+  const statusPermitidos = (Object.keys(TRANSICOES_PERMITIDAS) as Status[]).filter(
+    (status) => status !== "Cancelada" && podeAlterarStatus(usuario, demanda, status)
+  );
+  return {
+    editar: podeExecutar(usuario, "editarDemanda", demanda), // pode abrir o formulário de edição?
+    cancelar: podeAlterarStatus(usuario, demanda, "Cancelada"), // pode cancelar?
+    statusPermitidos, // para quais status pode mudar
+  };
 }
 
 // Diz se a mudança de status existe no ciclo de vida (409 na rota se não existir)

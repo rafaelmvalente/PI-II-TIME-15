@@ -25,6 +25,8 @@ import {
   podeAlterarStatus,
   transicaoValida,
   temPermissao,
+  podeSerResponsavel,
+  permissoesNaDemanda,
 } from "../auth/permissoes.js";
 import {
   STATUS_POR_SLUG,
@@ -102,6 +104,7 @@ function montarDemandaResumida(
   return {
     id: demanda.id,
     titulo: demanda.titulo,
+    descricao: demanda.descricao, // usada na busca textual da listagem
     tipo: demanda.tipo,
     prioridade: demanda.prioridade,
     status: demanda.status,
@@ -186,7 +189,10 @@ router.get("/demandas/:id", autenticar, async (req: Request, res: Response) => {
     return res.status(403).json({ mensagem: "Você não tem permissão para ver esta demanda" });
   }
 
-  return res.status(200).json(await montarDemandaDetalhada(demanda));
+  return res.status(200).json({
+    ...(await montarDemandaDetalhada(demanda)),
+    permissoes: permissoesNaDemanda(req.usuario!, demanda), // o que o usuário logado pode fazer nela
+  });
 });
 
 // POST /demandas — cria uma nova demanda. Status inicial é sempre "Aberta".
@@ -228,6 +234,9 @@ router.post("/demandas", autenticar, async (req: Request, res: Response) => {
 
   if (!podeExecutar(req.usuario!, "criarDemanda", { projetoId: projetoIdConvertido, responsavelId: null })) {
     return res.status(403).json({ mensagem: "Você não tem permissão para criar demandas neste projeto." });
+  }
+  if (responsavel && !podeSerResponsavel(responsavel, projetoIdConvertido)) {
+    return res.status(400).json({ mensagem: "O responsável precisa fazer parte do projeto da demanda." });
   }
 
   const alteracoes: Alteracao[] = responsavel
@@ -300,6 +309,13 @@ router.put("/demandas/:id", autenticar, async (req: Request, res: Response) => {
     if (!Number.isInteger(projetoIdConvertido) || !(await buscarProjetoPorId(projetoIdConvertido))) {
       return res.status(400).json({ mensagem: "Projeto inválido." });
     }
+    // Mudar de projeto: o usuário também precisa poder agir no projeto novo
+    if (
+      projetoIdConvertido !== demanda.projetoId &&
+      !podeExecutar(req.usuario!, "editarDemanda", { projetoId: projetoIdConvertido, responsavelId: null })
+    ) {
+      return res.status(403).json({ mensagem: "Você não tem permissão para mover a demanda para este projeto." });
+    }
     campos.projetoId = projetoIdConvertido;
   }
   if (responsavelId !== undefined) {
@@ -317,6 +333,20 @@ router.put("/demandas/:id", autenticar, async (req: Request, res: Response) => {
     if (responsavelIdConvertido !== demanda.responsavelId) {
       const anterior = demanda.responsavelId ? await buscarUsuarioPorId(demanda.responsavelId) : null;
       alteracoes.push({ tipo: "Responsável", anterior: anterior?.nome ?? null, novo: novoResponsavel?.nome ?? null });
+    }
+  }
+
+  // O responsável precisa fazer parte do projeto. Só confere quando o projeto
+  // ou o responsável mudam, para não travar a edição de demandas antigas.
+  const projetoFinal = campos.projetoId ?? demanda.projetoId;
+  const responsavelFinalId = campos.responsavelId !== undefined ? campos.responsavelId : demanda.responsavelId;
+  if (
+    responsavelFinalId &&
+    (projetoFinal !== demanda.projetoId || responsavelFinalId !== demanda.responsavelId)
+  ) {
+    const responsavelFinal = await buscarUsuarioPorId(responsavelFinalId);
+    if (!responsavelFinal || !podeSerResponsavel(responsavelFinal, projetoFinal)) {
+      return res.status(400).json({ mensagem: "O responsável precisa fazer parte do projeto da demanda." });
     }
   }
   if (prazoFinalizacao !== undefined) {

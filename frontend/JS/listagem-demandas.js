@@ -83,7 +83,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ordenarPor = filtroOrdenar.value;
 
     let resultado = demandas.filter((d) => {
-      return (!termoBusca || d.titulo.toLowerCase().includes(termoBusca))
+      return (!termoBusca
+          || d.titulo.toLowerCase().includes(termoBusca)
+          || (d.descricao ?? '').toLowerCase().includes(termoBusca))
         && (!status || slugPorStatus[d.status] === status)
         && (!prioridade || slugPorPrioridade[d.prioridade] === prioridade)
         && (!tipo || slugPorTipo[d.tipo] === tipo)
@@ -93,11 +95,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (ordenarPor) {
       const ordemPrioridade = { 'Crítica': 0, Alta: 1, 'Média': 2, Baixa: 3 };
+      // Ordem do ciclo de vida (não alfabética)
+      const ordemStatus = { Aberta: 0, 'Em andamento': 1, 'Em revisão': 2, 'Concluída': 3, Cancelada: 4 };
       resultado = [...resultado].sort((a, b) => {
         if (ordenarPor === 'prioridade') return ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade];
         if (ordenarPor === 'data_criacao') return new Date(a.criadaEm) - new Date(b.criadaEm);
         if (ordenarPor === 'prazo') return new Date(a.prazoFinalizacao ?? '9999-12-31') - new Date(b.prazoFinalizacao ?? '9999-12-31');
-        if (ordenarPor === 'status') return a.status.localeCompare(b.status);
+        if (ordenarPor === 'status') return ordemStatus[a.status] - ordemStatus[b.status];
         return 0;
       });
     }
