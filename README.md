@@ -6,7 +6,7 @@ Projeto desenvolvido para o componente curricular **Projeto Integrador 2**, do c
 
 O Sistema de Acompanhamento de Demandas de Desenvolvimento é uma aplicação inspirada em ferramentas utilizadas por equipes de tecnologia para organizar tarefas, defeitos (bugs) e melhorias de software.
 
-O sistema permite o cadastro de projetos, cada um com suas próprias demandas, usuários e histórico de acompanhamento.
+O sistema organiza as demandas por projeto: cada projeto tem suas próprias demandas, usuários vinculados e histórico de acompanhamento. Projetos e usuários são cadastrados diretamente no banco de dados (veja `database/02_dados_exemplo.sql`).
 
 Cada demanda representa uma tarefa, defeito, melhoria ou atividade de documentação, contendo:
 
