@@ -113,18 +113,45 @@ Por enquanto, o frontend são páginas estáticas. Com o repositório clonado, a
 PI-II-TIME-15/
 ├── backend/
 │   ├── src/
-│   │   └── server.ts
+│   │   ├── auth/
+│   │   │   ├── autenticar.ts        # middleware que exige login (token)
+│   │   │   ├── permissoes.ts        # regras de cada perfil e ciclo de status
+│   │   │   └── sessoes.ts           # sessões ativas (token -> usuário)
+│   │   ├── data/
+│   │   │   └── mapeamentos.ts       # conversão entre valores do frontend e do banco
+│   │   ├── db/
+│   │   │   ├── conexao.ts           # conexão com o MySQL
+│   │   │   ├── consultas.ts         # consultas de leitura (SELECT)
+│   │   │   └── escritas.ts          # gravações (INSERT/UPDATE) com histórico
+│   │   ├── routes/
+│   │   │   ├── authRoutes.ts        # login
+│   │   │   ├── dashboardRoutes.ts   # indicadores do dashboard
+│   │   │   ├── demandasRoutes.ts    # demandas, status, cancelamento e comentários
+│   │   │   ├── projetosRoutes.ts    # projetos visíveis ao usuário
+│   │   │   └── usuariosRoutes.ts    # usuários visíveis ao usuário
+│   │   ├── types/
+│   │   │   ├── express.d.ts
+│   │   │   └── modelos.ts           # tipos do sistema
+│   │   ├── feriados.ts              # validação de feriados (BrasilAPI)
+│   │   └── server.ts                # servidor Express
+│   ├── .env.example
 │   ├── .gitignore
 │   ├── package-lock.json
 │   ├── package.json
 │   └── tsconfig.json
+├── database/
+│   ├── 01_schema.sql                # criação das tabelas
+│   ├── 02_dados_exemplo.sql         # dados de exemplo
+│   ├── 03_consultas_exemplo.sql
+│   └── MODELAGEM.md
 ├── frontend/
 │   ├── CSS/
 │   │   ├── cadastro-demanda.css
 │   │   ├── dashboard.css
 │   │   ├── detalhes-demanda.css
 │   │   ├── listagem-demandas.css
-│   │   └── login.css
+│   │   ├── login.css
+│   │   └── menu.css
 │   ├── HTML/
 │   │   ├── cadastro-demanda.html
 │   │   ├── dashboard.html
@@ -132,10 +159,13 @@ PI-II-TIME-15/
 │   │   ├── listagem-demandas.html
 │   │   └── login.html
 │   └── JS/
+│       ├── api.js                   # acesso à API e sessão do usuário
 │       ├── cadastro-demanda.js
 │       ├── dashboard.js
+│       ├── detalhes-demanda.js
 │       ├── listagem-demandas.js
-│       └── login.js
+│       ├── login.js
+│       └── menu.js                  # menu de navegação
 └── README.md
 ```
 
@@ -263,7 +293,7 @@ A tela inicial apresenta indicadores resumidos do sistema, incluindo:
 
 ## Tecnologias utilizadas
 
-- **Frontend:** HTML5, CSS3, JavaScript, Bootstrap
+- **Frontend:** HTML5, CSS3, JavaScript
 - **Backend:** Node.js (LTS), TypeScript, Express
 - **Banco de dados:** MySQL / Oracle
 - **Controle de versão:** Git, GitHub e GitHub Projects

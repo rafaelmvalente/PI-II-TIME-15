@@ -70,6 +70,15 @@
         <button class="perigo" id="btnCancelar">Cancelar demanda</button>
       </div>
 
+      <!-- Escolha do novo status: só aparece ao clicar em "Alterar status" e
+           lista apenas os status que o usuário pode escolher -->
+      <div class="painel-status" id="painelStatus" hidden>
+        <label for="selectStatus" id="rotuloStatus">Novo status:</label>
+        <select id="selectStatus"></select>
+        <button class="primario" id="btnConfirmarStatus">Confirmar</button>
+        <button class="secundario" id="btnVoltarStatus">Voltar</button>
+      </div>
+
     </section>
 
     <!-- Histórico de alterações da demanda. Não é apagado nem após o cancelamento -->

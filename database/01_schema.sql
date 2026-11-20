@@ -66,7 +66,8 @@ CREATE TABLE tipo_alteracao (
 ) ENGINE=InnoDB;
 
 -- Máquina de estados: cada linha é uma transição de status permitida para um
--- perfil. A API consulta esta tabela em vez de repetir as regras no código.
+-- perfil. Documenta as regras no banco; quem as aplica é a API
+-- (backend/src/auth/permissoes.ts), que segue exatamente as mesmas transições.
 CREATE TABLE transicao_status (
   status_origem_id   TINYINT UNSIGNED NOT NULL,
   status_destino_id  TINYINT UNSIGNED NOT NULL,

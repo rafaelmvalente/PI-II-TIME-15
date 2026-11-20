@@ -177,8 +177,8 @@ listagem e do dashboard) e **FULLTEXT** em título + descrição (busca textual)
 | Regra do escopo | Como o banco garante |
 |---|---|
 | Tipo, prioridade e status só aceitam os valores previstos | Tabelas de domínio com chave estrangeira |
-| Ciclo de vida do status (Aberta → Em andamento → Em revisão → Concluída; Em revisão → Em andamento; qualquer status exceto Concluída → Cancelada) | Tabela `transicao_status` |
-| Membro da Equipe só faz Aberta → Em andamento e Em andamento → Em revisão | Linhas de `transicao_status` por perfil (Administrador e Líder: 7 transições; Membro: 2) |
+| Ciclo de vida do status (Aberta → Em andamento → Em revisão → Concluída; Em revisão → Em andamento; qualquer status exceto Concluída → Cancelada) | Registrado na tabela `transicao_status`; aplicado pela API (`permissoes.ts`) com as mesmas regras |
+| Membro da Equipe só faz Aberta → Em andamento e Em andamento → Em revisão | Linhas de `transicao_status` por perfil (Administrador e Líder: 7 transições; Membro: 2); aplicado pela API (`permissoes.ts`) |
 | Não existe exclusão física de demandas | Trigger `trg_demanda_bloqueia_exclusao` (cancelar = mudar o status) |
 | O histórico nunca é apagado nem alterado | Triggers `trg_historico_bloqueia_alteracao` e `trg_historico_bloqueia_exclusao` |
 | Comentário tem autor, data e horário | Colunas `usuario_id` e `criado_em` obrigatórias |
