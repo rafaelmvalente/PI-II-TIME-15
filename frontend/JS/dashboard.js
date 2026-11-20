@@ -9,6 +9,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var filtroProjeto = document.getElementById("filtroProjeto");
 
+  var mensagemApi = document.getElementById("mensagemApi");
+
+  // Mostra na tela o erro vindo da API
+  function mostrarErro(erro) {
+    mensagemApi.textContent = erro.message;
+    mensagemApi.classList.add("mensagem-erro");
+  }
+
+  // Apaga o erro anterior antes de uma nova consulta
+  function limparErro() {
+    mensagemApi.textContent = "";
+    mensagemApi.classList.remove("mensagem-erro");
+  }
+
   var rotuloPorStatus = {
     aberta: "numeroAberta",
     emAndamento: "numeroEmAndamento",
@@ -42,6 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   async function carregarDashboard(filtros) {
+    limparErro();
     var parametros = new URLSearchParams();
     if (filtros && filtros.projeto) parametros.set("projeto", filtros.projeto);
     if (filtros && filtros.dataInicio) parametros.set("dataInicio", filtros.dataInicio);
@@ -86,8 +101,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  carregarProjetos().catch(function () {});
-  carregarDashboard().catch(function (erro) { console.error(erro); });
+  carregarProjetos().catch(mostrarErro);
+  carregarDashboard().catch(mostrarErro);
 
   var campoDataInicio = document.getElementById("dataInicio");
   var campoDataFim = document.getElementById("dataFim");
@@ -169,6 +184,6 @@ document.addEventListener("DOMContentLoaded", function () {
       dataFim: dataFim,
       quantidadeItens: quantidade,
       ordenarPor: ordenacaoSelecionada.value,
-    }).catch(function (erro) { console.error(erro); });
+    }).catch(mostrarErro);
   });
 });

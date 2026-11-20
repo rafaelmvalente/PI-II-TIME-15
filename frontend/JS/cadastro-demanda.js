@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const selectResponsavel = document.getElementById('responsavel'); // select de responsável
   // Id da URL (?id=); null = nova demanda
   const idDemandaEditando = new URLSearchParams(window.location.search).get('id');
+  let demandaOriginal = null; // demanda em edição, como veio da API (null = nova demanda)
 
   const mensagemApi = document.createElement('p'); // parágrafo para mensagens da API
   mensagemApi.className = 'mensagem-api'; // aplica o estilo da mensagem
@@ -41,11 +42,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // No modo de edição, busca a demanda e preenche o formulário
-  async function carregarDemandaParaEdicao() {
-    if (!idDemandaEditando) return; // nova demanda: não há o que carregar
-
-    const demanda = await apiFetch(`/demandas/${idDemandaEditando}`); // busca a demanda na API
+  // Preenche os campos do formulário com os dados da demanda
+  function preencherFormulario(demanda) {
     document.getElementById('titulo').value = demanda.titulo; // preenche o título
     document.getElementById('descricao').value = demanda.descricao; // preenche a descrição
     selectProjeto.value = demanda.projetoId; // seleciona o projeto
@@ -63,6 +61,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('tipo').value = slugPorValorPt.tipo[demanda.tipo]; // seleciona o tipo
     // Seleciona a prioridade
     document.getElementById('prioridade').value = slugPorValorPt.prioridade[demanda.prioridade];
+  }
+
+  // No modo de edição, busca a demanda e preenche o formulário
+  async function carregarDemandaParaEdicao() {
+    if (!idDemandaEditando) return; // nova demanda: não há o que carregar
+
+    demandaOriginal = await apiFetch(`/demandas/${idDemandaEditando}`); // busca a demanda na API
+    preencherFormulario(demandaOriginal); // coloca os dados nos campos
 
     // Troca o título da tela
     document.querySelector('.cadastro-header h2').textContent = 'Editar Demanda';
@@ -76,6 +82,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (erro) {
     mensagemApi.textContent = erro.message; // mostra o erro da API na tela
     mensagemApi.classList.add('mensagem-erro'); // deixa a mensagem em vermelho
+  }
+
+  // Sem permissão (ex.: página aberta direto pela URL): avisa e não deixa salvar
+  const semPermissao = idDemandaEditando
+    ? demandaOriginal && !demandaOriginal.permissoes?.editar // edição: o backend diz se pode
+    : obterUsuario()?.perfil === 'Membro da Equipe'; // cadastro: Membro não cria demandas
+  if (semPermissao) {
+    mensagemApi.textContent = idDemandaEditando
+      ? 'Você não tem permissão para editar esta demanda.'
+      : 'Seu perfil não tem permissão para criar demandas.';
+    mensagemApi.classList.add('mensagem-erro'); // deixa a mensagem em vermelho
+  }
+  // Na edição, sem a demanda carregada (erro já mostrado acima) também não há o que salvar
+  if (semPermissao || (idDemandaEditando && !demandaOriginal)) {
+    document.getElementById('btnSalvar').disabled = true; // impede o envio
   }
 
   // Regras de validação de cada campo: elemento, evento que dispara e função que valida
@@ -122,6 +143,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       evento: 'change', // valida ao trocar a data
       validar: (valor) => {
         if (!valor) return null; // sem prazo: válido
+        // Na edição, manter o prazo que já estava salvo é permitido (mesmo vencido)
+        if (valor === demandaOriginal?.prazoFinalizacao) return null;
 
         const hoje = new Date(); // data de hoje
         hoje.setHours(0, 0, 0, 0); // zera o horário para comparar só a data
@@ -214,9 +237,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Ao cancelar: limpa o formulário e os erros
+  // Ao cancelar: desfaz as mudanças e limpa os erros
   document.getElementById('btnCancelar').addEventListener('click', () => {
-    form.reset(); // volta os campos ao estado inicial
+    if (demandaOriginal) {
+      preencherFormulario(demandaOriginal); // edição: volta aos dados salvos da demanda
+    } else {
+      form.reset(); // cadastro: volta os campos ao estado inicial
+    }
     // Remove as mensagens de erro
     document.querySelectorAll('.erro-validacao').forEach(el => el.remove());
     // Tira os destaques vermelhos

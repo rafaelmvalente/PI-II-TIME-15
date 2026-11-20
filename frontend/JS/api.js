@@ -34,14 +34,21 @@ function exigirLogin() {
 
 // Wrapper de fetch que já manda o token e trata sessão expirada/inválida.
 async function apiFetch(caminho, opcoes = {}) {
-  const resposta = await fetch(`${API_BASE_URL}${caminho}`, {
-    ...opcoes,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(obterToken() ? { Authorization: `Bearer ${obterToken()}` } : {}),
-      ...(opcoes.headers || {}),
-    },
-  });
+  let resposta;
+  try {
+    resposta = await fetch(`${API_BASE_URL}${caminho}`, {
+      ...opcoes,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(obterToken() ? { Authorization: `Bearer ${obterToken()}` } : {}),
+        ...(opcoes.headers || {}),
+      },
+    });
+  } catch {
+    // O fetch só falha assim quando não há resposta (servidor desligado ou
+    // sem rede); o navegador daria uma mensagem em inglês ("Failed to fetch").
+    throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está rodando.');
+  }
 
   const dados = await resposta.json().catch(() => null);
 

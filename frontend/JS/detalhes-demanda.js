@@ -8,6 +8,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const idDemanda = new URLSearchParams(window.location.search).get('id');
   const mensagemApi = document.getElementById('mensagemApi');
+  const btnEditar = document.getElementById('btnEditar');
+  const btnAlterarStatus = document.getElementById('btnAlterarStatus');
+  const btnCancelar = document.getElementById('btnCancelar');
+  const painelStatus = document.getElementById('painelStatus');
+  const selectStatus = document.getElementById('selectStatus');
+  let statusPermitidos = []; // status para onde o usuário pode levar a demanda
+
+  // Mostra só os botões que o usuário logado pode usar nesta demanda.
+  // Sem permissões (ex.: erro ao carregar), todos ficam escondidos.
+  function atualizarBotoes(permissoes) {
+    statusPermitidos = permissoes?.statusPermitidos ?? [];
+    btnEditar.style.display = permissoes?.editar ? '' : 'none';
+    btnAlterarStatus.style.display = statusPermitidos.length > 0 ? '' : 'none';
+    btnCancelar.style.display = permissoes?.cancelar ? '' : 'none';
+    painelStatus.hidden = true; // a escolha de status recomeça fechada
+  }
+  atualizarBotoes(null); // começa escondendo tudo até a demanda carregar
 
   const classePorStatus = {
     'Aberta': 'status-aberta',
@@ -47,6 +64,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   function mostrarErro(erro) {
     mensagemApi.textContent = erro.message;
     mensagemApi.classList.add('mensagem-erro');
+  }
+
+  // Apaga o erro da ação anterior antes de tentar uma nova
+  function limparErro() {
+    mensagemApi.textContent = '';
+    mensagemApi.classList.remove('mensagem-erro');
   }
 
   async function carregarDemanda() {
@@ -104,6 +127,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       listaComentarios.appendChild(li);
     });
 
+    atualizarBotoes(demanda.permissoes);
+
     return demanda;
   }
 
@@ -113,19 +138,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     mostrarErro(erro);
   }
 
-  document.getElementById('btnEditar').addEventListener('click', () => {
+  btnEditar.addEventListener('click', () => {
     window.location.href = `cadastro-demanda.html?id=${idDemanda}`;
   });
 
-  document.getElementById('btnAlterarStatus').addEventListener('click', async () => {
-    const opcoes = ['aberta', 'em_andamento', 'em_revisao', 'concluida', 'cancelada'];
-    const novoStatus = window.prompt(`Informe o novo status (${opcoes.join(', ')}):`);
-    if (!novoStatus) return;
+  // Abre o painel com só os status que o usuário pode escolher
+  btnAlterarStatus.addEventListener('click', () => {
+    // Deixa claro de qual status a demanda está saindo (o select só traz os próximos)
+    const statusAtual = document.getElementById('tagStatus').textContent;
+    document.getElementById('rotuloStatus').textContent = `Mudar de "${statusAtual}" para:`;
+    selectStatus.innerHTML = '';
+    statusPermitidos.forEach((status) => {
+      const opcao = document.createElement('option');
+      opcao.value = status; // o backend aceita o nome em português
+      opcao.textContent = status;
+      selectStatus.appendChild(opcao);
+    });
+    painelStatus.hidden = false;
+    selectStatus.focus();
+  });
 
+  // Fecha o painel sem alterar nada
+  document.getElementById('btnVoltarStatus').addEventListener('click', () => {
+    painelStatus.hidden = true;
+  });
+
+  // Envia o status escolhido
+  document.getElementById('btnConfirmarStatus').addEventListener('click', async () => {
+    limparErro();
     try {
       await apiFetch(`/demandas/${idDemanda}/status`, {
         method: 'PATCH',
-        body: JSON.stringify({ status: novoStatus.trim() }),
+        body: JSON.stringify({ status: selectStatus.value }),
       });
       await carregarDemanda();
     } catch (erro) {
@@ -133,9 +177,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  document.getElementById('btnCancelar').addEventListener('click', async () => {
+  btnCancelar.addEventListener('click', async () => {
     if (!window.confirm('Tem certeza que deseja cancelar esta demanda?')) return;
 
+    limparErro();
     try {
       await apiFetch(`/demandas/${idDemanda}/cancelar`, { method: 'POST' });
       await carregarDemanda();
@@ -149,6 +194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const campoTexto = document.getElementById('textoComentario');
     if (!campoTexto.value.trim()) return;
 
+    limparErro();
     try {
       await apiFetch(`/demandas/${idDemanda}/comentarios`, {
         method: 'POST',

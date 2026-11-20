@@ -239,3 +239,13 @@ select {
 .campo-invalido {
   border-color: #dc2626 !important;
 }
+
+/* Mensagem de erro da API */
+.mensagem-api {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+.mensagem-api.mensagem-erro {
+  color: #dc2626;
+}

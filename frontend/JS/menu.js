@@ -17,7 +17,11 @@ function renderMenu() {
   const nav = document.createElement('nav');
   nav.className = 'menu-navegacao';
 
-  const links = PAGINAS_MENU.map(({ arquivo, rotulo }) => {
+  // Membro da Equipe não cria demandas, então não vê o link "Nova demanda"
+  const paginas = PAGINAS_MENU.filter(({ arquivo }) =>
+    !(arquivo === 'cadastro-demanda.html' && usuario?.perfil === 'Membro da Equipe'));
+
+  const links = paginas.map(({ arquivo, rotulo }) => {
     const ativo = arquivo === paginaAtual ? ' menu-link-ativo' : '';
     return `<a class="menu-link${ativo}" href="${arquivo}">${rotulo}</a>`;
   }).join('');
